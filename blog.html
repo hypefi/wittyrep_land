@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog - WittyReply | WhatsApp Automation Insights</title>
+    <meta name="description" content="Expert insights on WhatsApp automation, customer service tips, and small business growth strategies from WittyReply.">
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MQHKZ9D6');</script>
+    <!-- End Google Tag Manager -->
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      
+      .btn-primary, .btn-secondary {
+        display: inline-block;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+      }
+      
+      .btn-primary {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+      }
+      
+      .btn-primary:hover, .btn-secondary:hover {
+        text-decoration: none;
+        transform: scale(1.05);
+      }
+      
+      .section {
+        padding: 80px 0;
+      }
+      
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+      
+      .card {
+        background: rgba(31, 41, 55, 0.5);
+        border: 1px solid rgba(55, 65, 81, 0.3);
+        border-radius: 12px;
+        padding: 32px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+      }
+      
+      .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #10b981 50%, #059669 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-white overflow-x-hidden">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MQHKZ9D6"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="text-2xl font-bold gradient-text flex items-center">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/512px-WhatsApp.svg.png?20220228223904" alt="WhatsApp Logo" class="w-8 h-8 mr-2" />
+            <a href="index.html" class="text-white hover:text-primary-500 transition-colors">WittyReply</a>
+          </div>
+          <div class="hidden md:flex space-x-8">
+            <a href="index.html#features" class="text-white hover:text-primary-500 transition-colors">Features</a>
+            <a href="index.html#how-it-works" class="text-white hover:text-primary-500 transition-colors">How It Works</a>
+            <a href="index.html#pricing" class="text-white hover:text-primary-500 transition-colors">Pricing</a>
+            <a href="blog.html" class="text-primary-500 transition-colors">Blog</a>
+            <a href="index.html#contact" class="text-white hover:text-primary-500 transition-colors">Contact</a>
+          </div>
+          <button id="mobileMenuBtn" class="md:hidden text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed top-0 left-0 right-0 bottom-0 bg-gray-900 z-40 transform -translate-x-full transition-transform duration-300 md:hidden">
+      <div class="flex flex-col items-center justify-center h-full space-y-8">
+        <a href="index.html#features" class="text-2xl text-white hover:text-primary-500 transition-colors mobile-menu-link">Features</a>
+        <a href="index.html#how-it-works" class="text-2xl text-white hover:text-primary-500 transition-colors mobile-menu-link">How It Works</a>
+        <a href="index.html#pricing" class="text-2xl text-white hover:text-primary-500 transition-colors mobile-menu-link">Pricing</a>
+        <a href="blog.html" class="text-2xl text-primary-500 transition-colors mobile-menu-link">Blog</a>
+        <a href="index.html#contact" class="text-2xl text-white hover:text-primary-500 transition-colors mobile-menu-link">Contact</a>
+      </div>
+    </div>
+
+    <!-- Blog Hero Section -->
+    <section class="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
+      <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,197,94,0.1),transparent_50%)]"></div>
+      
+      <div class="container mx-auto px-4 text-center relative z-10">
+        <div class="animate-fade-in">
+          <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight gradient-text">
+            WittyReply Blog
+          </h1>
+          <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto">
+            Expert insights on WhatsApp automation, customer service optimization, and small business growth strategies.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog Articles Section -->
+    <section class="section bg-gray-800/50">
+      <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <article class="card">
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-3">
+                <span class="bg-primary-500/20 text-primary-400 px-3 py-1 rounded-full text-sm font-medium">Customer Service</span>
+                <span class="text-gray-400 text-sm">December 2024</span>
+              </div>
+              <h3 class="text-xl font-semibold mb-3 leading-tight">
+                <a href="posts/blog-whatsapp-automation-smb.html" class="text-white hover:text-primary-400 transition-colors">
+                  How WhatsApp Automation Can Transform Your Small Business Customer Service (And Save You 20+ Hours Per Week)
+                </a>
+              </h3>
+              <p class="text-gray-300 mb-4">
+                Discover how small and medium businesses are using WhatsApp automation to provide 24/7 customer service, reduce response times, and free up valuable time for business growth. Learn the 5 key benefits and see real-world examples.
+              </p>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <span class="text-sm text-gray-400">📖 6 min read</span>
+                  <div class="flex space-x-2">
+                    <span class="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm">WhatsApp</span>
+                    <span class="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm">Automation</span>
+                    <span class="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm">SMB</span>
+                  </div>
+                </div>
+                <a href="posts/blog-whatsapp-automation-smb.html" class="text-primary-500 hover:text-primary-400 transition-colors font-medium">
+                  Read More →
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-3">
+                <span class="bg-primary-500/20 text-primary-400 px-3 py-1 rounded-full text-sm font-medium">Automation</span>
+                <span class="text-gray-400 text-sm">June 2025</span>
+              </div>
+              <h3 class="text-xl font-semibold mb-3 leading-tight">
+                <a href="posts/blog_post_2025-06-25.html" class="text-white hover:text-primary-400 transition-colors">
+                  The Complete Guide to WhatsApp Business API for E-commerce: Effective Ways to Use WittyReply
+                </a>
+              </h3>
+              <p class="text-gray-300 mb-4">
+                In the bustling landscape of e-commerce, where customer interactions can make or break a sale, small to medium-sized businesses (SMBs) are constantly seeking innovative ways to enhance their customer service.
+              </p>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <span class="text-sm text-gray-400">📖 6 min read</span>
+                  <div class="flex space-x-2">
+                    <span class="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm">WhatsApp Business API</span>
+                    <span class="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm">WittyReply</span>
+                  </div>
+                </div>
+                <a href="posts/blog_post_2025-06-25.html" class="text-primary-500 hover:text-primary-400 transition-colors font-medium">
+                  Read More →
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog CTA Section -->
+    <section class="section">
+      <div class="container mx-auto px-4">
+        <div class="text-center">
+          <h2 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">
+            Ready to Transform Your Customer Service?
+          </h2>
+          <p class="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+            See how WittyReply can automate your WhatsApp customer service and save you 20+ hours per week.
+          </p>
+          <a href="index.html#contact" class="btn-primary text-lg px-8 py-4">
+            Get Your Free Demo
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="section bg-gray-800 border-t border-gray-700">
+      <div class="container mx-auto px-4">
+        <div class="text-center">
+          <div class="text-3xl font-bold gradient-text mb-4 flex items-center justify-center">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/512px-WhatsApp.svg.png?20220228223904" alt="WhatsApp Logo" class="w-8 h-8 mr-2" />
+            WittyReply
+          </div>
+          <p class="text-gray-400 mb-8">
+            AI-powered WhatsApp assistant for small and medium businesses
+          </p>
+          <div class="flex justify-center space-x-6 mb-4">
+            <a href="../privacy.html" class="text-gray-400 hover:text-primary-500 transition-colors">Privacy Policy</a>
+            <a href="../terms.html" class="text-gray-400 hover:text-primary-500 transition-colors">Terms of Service</a>
+          </div>
+          <p class="text-gray-500 text-sm">
+            © 2024 WittyReply. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html> 
