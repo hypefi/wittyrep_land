@@ -77,9 +77,12 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Form submission handler
   const contactForm = document.querySelector('.contact-form form');
+  console.log('Contact form found:', contactForm);
+  
   if (contactForm) {
     contactForm.addEventListener('submit', async function(e) {
       e.preventDefault();
+      console.log('Form submission started...');
       
       const submitButton = this.querySelector('button[type="submit"]');
       const originalText = submitButton.textContent;
@@ -95,11 +98,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Simple validation
         const name = formData.get('name');
         const email = formData.get('email');
+        const company = formData.get('company');
+        const message = formData.get('message');
+        
+        console.log('Form data:', { name, email, company, message });
         
         if (!name || !email) {
           showNotification('Please fill in all required fields', 'error');
           return;
         }
+        
+        console.log('Sending to worker...');
         
         // Send to Cloudflare Worker
         const response = await fetch('https://wiityreplyform.hypefi.workers.dev/', {
@@ -107,7 +116,11 @@ document.addEventListener('DOMContentLoaded', function() {
           body: formData
         });
         
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
         const result = await response.json();
+        console.log('Response data:', result);
         
         if (response.ok) {
           showNotification('Thank you! We\'ll contact you soon to schedule your demo.', 'success');
@@ -118,6 +131,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
       } catch (error) {
         console.error('Form submission error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
         showNotification('Sorry, there was an error submitting your request. Please try again.', 'error');
       } finally {
         // Reset button
@@ -126,6 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.style.opacity = '1';
       }
     });
+  } else {
+    console.error('Contact form not found! Check the selector.');
   }
   
   // Button hover effects
@@ -252,3 +272,30 @@ window.addEventListener('load', function() {
 });
 
 console.log('Modern Landing Page Loaded! 🚀');
+
+// Test function for debugging form submission
+window.testFormSubmission = async function() {
+  console.log('Testing form submission...');
+  
+  const formData = new FormData();
+  formData.append('name', 'Test User');
+  formData.append('email', 'test@example.com');
+  formData.append('company', 'Test Company');
+  formData.append('message', 'Test message from browser');
+  
+  try {
+    const response = await fetch('https://wiityreplyform.hypefi.workers.dev/', {
+      method: 'POST',
+      body: formData
+    });
+    
+    console.log('Test response status:', response.status);
+    const result = await response.json();
+    console.log('Test response data:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('Test error:', error);
+    return error;
+  }
+};
