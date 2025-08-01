@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://wittyrep.com/sitemap.xml
+
+# Block access to admin/development files if any
+Disallow: /src/
+Disallow: /node_modules/
+Disallow: /.git/
