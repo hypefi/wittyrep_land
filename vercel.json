@@ -4,6 +4,22 @@
   "framework": "vite",
   "routes": [
     {
+      "src": "/ar",
+      "dest": "/ar.html"
+    },
+    {
+      "src": "/ar/",
+      "dest": "/ar.html"
+    },
+    {
+      "src": "/fr",
+      "dest": "/fr.html"
+    },
+    {
+      "src": "/fr/",
+      "dest": "/fr.html"
+    },
+    {
       "src": "/robots.txt",
       "dest": "/robots.txt"
     },
