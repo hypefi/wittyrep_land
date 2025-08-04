@@ -1,0 +1,15 @@
+# Language redirects
+/ar /ar.html 200
+/ar/ /ar.html 200
+/fr /fr.html 200
+/fr/ /fr.html 200
+
+# Blog post redirects
+/blog-post-2025-06-25 /blog-post-2025-06-25.html 200
+/blog-whatsapp-automation-smb /blog-whatsapp-automation-smb.html 200
+/blog-cost-manual-whatsapp-management /blog-cost-manual-whatsapp-management.html 200
+/blog-real-estate-whatsapp-automation /blog-real-estate-whatsapp-automation.html 200
+/blog-whatsapp-lead-generation-sequences /blog-whatsapp-lead-generation-sequences.html 200
+
+# Catch all - serve index.html for SPA routing
+/* /index.html 200 
