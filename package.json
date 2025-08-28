@@ -6,7 +6,20 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "blog:generate": "node scripts/daily-automation.js generate 1",
+    "blog:generate:multiple": "node scripts/daily-automation.js generate",
+    "blog:keywords": "node scripts/keyword-planner.js 10",
+    "blog:setup": "node scripts/setup-cron.js setup",
+    "blog:status": "node scripts/setup-cron.js status",
+    "blog:config": "node scripts/daily-automation.js config show",
+    "blog:report": "node scripts/daily-automation.js report",
+    
+    // NEW: Git-based automation for Cloudflare Pages
+    "blog:git:generate": "node scripts/git-automation.js generate 1",
+    "blog:git:generate:multiple": "node scripts/git-automation.js generate",
+    "blog:git:commit": "node scripts/git-automation.js commit-only",
+    "blog:git:status": "node scripts/git-automation.js status"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.10",

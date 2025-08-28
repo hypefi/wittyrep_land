@@ -1,0 +1,23 @@
+{
+  "date": "2025-08-28",
+  "postsGenerated": 1,
+  "totalPosts": 8,
+  "keywordsUsed": 1,
+  "topicsGenerated": 1,
+  "config": {
+    "postsPerDay": 1,
+    "maxPostsInQueue": 30,
+    "autoPublish": false,
+    "notificationEmail": "",
+    "keywordsPerPost": 3,
+    "contentVariation": "high",
+    "seoOptimization": true,
+    "socialSharing": false
+  },
+  "generatedPosts": [
+    {
+      "filename": "blog-how-whatsapp-automation-can-optimize-your-business-2025-08-28.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-how-whatsapp-automation-can-optimize-your-business-2025-08-28.html"
+    }
+  ]
+}
