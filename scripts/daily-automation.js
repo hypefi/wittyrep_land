@@ -219,32 +219,88 @@ class DailyAutomation {
       // Read existing blog index
       let blogIndex = fs.readFileSync(blogIndexFile, 'utf8');
       
-      // Add new blog post entry to the posts list
+      // Create new blog post entry matching your existing structure
       const newPostEntry = `
-        <div class="bg-gray-800/30 p-6 rounded-lg border border-gray-700 hover:border-green-500 transition-colors">
-          <h3 class="text-xl font-semibold mb-3">
-            <a href="posts/blog-${postData.slug}-${postData.publishDate}.html" class="text-white hover:text-green-400 transition-colors">
-              ${postData.title}
-            </a>
-          </h3>
-          <p class="text-gray-300 mb-4">${postData.description}</p>
-          <div class="flex items-center justify-between text-sm text-gray-400">
-            <span>${postData.publishDate}</span>
-            <span class="bg-green-900/20 text-green-400 px-2 py-1 rounded">${postData.difficulty}</span>
-          </div>
-        </div>`;
+          <article class="card">
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-3">
+                <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-medium">${this.getCategoryFromKeyword(postData.keyword)}</span>
+                <span class="text-gray-400 text-sm">${this.formatDate(postData.publishDate)}</span>
+              </div>
+              <h3 class="text-xl font-semibold mb-3 leading-tight">
+                <a href="posts/blog-${postData.slug}-${postData.publishDate}.html" class="text-white hover:text-primary-400 transition-colors">
+                  ${postData.title}
+                </a>
+              </h3>
+              <p class="text-gray-300 mb-4">
+                ${postData.description}
+              </p>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <span class="text-sm text-gray-400">📖 ${this.estimateReadTime(postData.estimatedWords)} min read</span>
+                  <div class="flex space-x-2">
+                    <span class="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm">${this.getCategoryFromKeyword(postData.keyword)}</span>
+                    <span class="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm">Automation</span>
+                    <span class="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm">Business</span>
+                  </div>
+                </div>
+                <a href="posts/blog-${postData.slug}-${postData.publishDate}.html" class="text-primary-500 hover:text-primary-400 transition-colors font-medium">
+                  Read More →
+                </a>
+              </div>
+            </div>
+          </article>`;
       
-      // Find the posts container and add new post
-      const postsContainer = blogIndex.indexOf('<div class="grid md:grid-cols-2 gap-6">');
-      if (postsContainer !== -1) {
-        const insertPoint = blogIndex.indexOf('</div>', postsContainer) + 6;
-        blogIndex = blogIndex.slice(0, insertPoint) + newPostEntry + blogIndex.slice(insertPoint);
-        fs.writeFileSync(blogIndexFile, blogIndex);
-        this.log('✅ Blog index updated');
+      // Find the posts container - look for the section containing articles
+      const postsSection = blogIndex.indexOf('<section class="section" id="blog-posts">');
+      if (postsSection === -1) {
+        // Try alternative patterns
+        const articlePattern = blogIndex.indexOf('<article class="card">');
+        if (articlePattern === -1) {
+          this.log('⚠️ Could not find posts section in blog.html');
+          return;
+        }
+        
+        // Insert before the first article
+        blogIndex = blogIndex.slice(0, articlePattern) + newPostEntry + '\n          ' + blogIndex.slice(articlePattern);
+      } else {
+        // Find the end of the posts section
+        const sectionEnd = blogIndex.indexOf('</section>', postsSection);
+        if (sectionEnd !== -1) {
+          // Insert before the section ends
+          blogIndex = blogIndex.slice(0, sectionEnd) + newPostEntry + '\n          ' + blogIndex.slice(sectionEnd);
+        }
       }
+      
+      fs.writeFileSync(blogIndexFile, blogIndex);
+      this.log('✅ Blog index updated');
+      
     } catch (error) {
       this.log(`⚠️ Error updating blog index: ${error.message}`, 'WARN');
     }
+  }
+
+  // Helper functions
+  getCategoryFromKeyword(keyword) {
+    if (keyword.includes('lead generation')) return 'Lead Generation';
+    if (keyword.includes('customer service')) return 'Customer Service';
+    if (keyword.includes('real estate')) return 'Real Estate';
+    if (keyword.includes('automation')) return 'Automation';
+    if (keyword.includes('business')) return 'Business Growth';
+    return 'WhatsApp';
+  }
+
+  formatDate(dateString) {
+    const date = new Date(dateString);
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${months[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  estimateReadTime(wordCount) {
+    const wordsPerMinute = 200;
+    const minutes = Math.ceil(wordCount / wordsPerMinute);
+    return minutes;
   }
 
   cleanupOldPosts() {
