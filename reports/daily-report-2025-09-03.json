@@ -1,0 +1,31 @@
+{
+  "date": "2025-09-03",
+  "postsGenerated": 3,
+  "totalPosts": 17,
+  "keywordsUsed": 4,
+  "topicsGenerated": 3,
+  "config": {
+    "postsPerDay": 3,
+    "maxPostsInQueue": 30,
+    "autoPublish": false,
+    "notificationEmail": "",
+    "keywordsPerPost": 3,
+    "contentVariation": "high",
+    "seoOptimization": true,
+    "socialSharing": false
+  },
+  "generatedPosts": [
+    {
+      "filename": "blog-how-whatsapp-automation-can-enhance-your-business-2025-09-03.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-how-whatsapp-automation-can-enhance-your-business-2025-09-03.html"
+    },
+    {
+      "filename": "blog-how-whatsapp-automation-can-streamline-your-business-2025-09-03.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-how-whatsapp-automation-can-streamline-your-business-2025-09-03.html"
+    },
+    {
+      "filename": "blog-transform-your-customer-service-with-whatsapp-automation-a-complete-guide-2025-09-03.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-transform-your-customer-service-with-whatsapp-automation-a-complete-guide-2025-09-03.html"
+    }
+  ]
+}
