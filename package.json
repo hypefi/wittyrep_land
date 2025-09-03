@@ -15,7 +15,6 @@
     "blog:config": "node scripts/daily-automation.js config show",
     "blog:report": "node scripts/daily-automation.js report",
     
-    // NEW: Git-based automation for Cloudflare Pages
     "blog:git:generate": "node scripts/git-automation.js generate 1",
     "blog:git:generate:multiple": "node scripts/git-automation.js generate",
     "blog:git:commit": "node scripts/git-automation.js commit-only",
