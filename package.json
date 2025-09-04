@@ -18,7 +18,10 @@
     "blog:git:generate": "node scripts/git-automation.js generate 1",
     "blog:git:generate:multiple": "node scripts/git-automation.js generate",
     "blog:git:commit": "node scripts/git-automation.js commit-only",
-    "blog:git:status": "node scripts/git-automation.js status"
+    "blog:git:status": "node scripts/git-automation.js status",
+    
+    "sitemap:sync": "node scripts/sync-sitemap.js",
+    "sitemap:preview": "node scripts/sync-sitemap.js --dry-run"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.10",
