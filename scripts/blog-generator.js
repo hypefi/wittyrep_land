@@ -3,6 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import AIContentGenerator from './ai-title-generator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,6 +12,7 @@ class BlogPostGenerator {
   constructor() {
     this.templates = this.loadTemplates();
     this.contentBlocks = this.loadContentBlocks();
+    this.aiContentGenerator = new AIContentGenerator();
   }
 
   loadTemplates() {
@@ -71,21 +73,65 @@ class BlogPostGenerator {
     };
   }
 
-  generateBlogPost(topic) {
-    const postData = {
-      title: topic.title,
-      keyword: topic.keyword,
-      description: topic.description,
-      outline: topic.outline,
-      difficulty: topic.difficulty,
-      estimatedWords: topic.estimatedWords,
-      publishDate: new Date().toISOString().split('T')[0],
-      slug: this.generateSlug(topic.title),
-      content: this.generateContent(topic),
-      meta: this.generateMeta(topic)
-    };
+  async generateBlogPost(topic) {
+    try {
+      console.log(`🤖 Generating complete AI article for: ${topic.keyword}`);
+      
+      // Generate complete article with OpenAI
+      const article = await this.aiContentGenerator.generateCompleteArticle(topic.keyword, {
+        industry: this.getIndustryFromKeyword(topic.keyword),
+        difficulty: topic.difficulty || 'intermediate',
+        targetWords: topic.estimatedWords || 2000
+      });
 
-    return postData;
+      // Structure the content for our template
+      const structuredContent = this.aiContentGenerator.generateStructuredHTML(article);
+
+      const postData = {
+        title: article.title,
+        keyword: article.keyword,
+        description: article.description,
+        outline: article.outline,
+        difficulty: topic.difficulty || 'intermediate',
+        estimatedWords: article.wordCount,
+        publishDate: new Date().toISOString().split('T')[0],
+        slug: this.generateSlug(article.title),
+        content: structuredContent,
+        meta: this.generateMeta({
+          title: article.title,
+          description: article.description,
+          keyword: article.keyword
+        }),
+        isAIGenerated: true,
+        wordCount: article.wordCount,
+        rawContent: article.content // Keep original for debugging
+      };
+
+      console.log(`✅ AI article generated: "${article.title}" (${article.wordCount} words)`);
+      return postData;
+      
+    } catch (error) {
+      console.error('❌ Error generating AI content:', error.message);
+      console.log('🔄 Falling back to template-based generation...');
+      
+      // Fallback to original template-based method
+      const postData = {
+        title: topic.title,
+        keyword: topic.keyword,
+        description: topic.description,
+        outline: topic.outline,
+        difficulty: topic.difficulty,
+        estimatedWords: topic.estimatedWords,
+        publishDate: new Date().toISOString().split('T')[0],
+        slug: this.generateSlug(topic.title),
+        content: this.generateContent(topic),
+        meta: this.generateMeta(topic),
+        isAIGenerated: false,
+        fallbackReason: error.message
+      };
+
+      return postData;
+    }
   }
 
   generateSlug(title) {
@@ -477,6 +523,17 @@ class BlogPostGenerator {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  }
+
+  getIndustryFromKeyword(keyword) {
+    const lowerKeyword = keyword.toLowerCase();
+    if (lowerKeyword.includes('real estate')) return 'real estate';
+    if (lowerKeyword.includes('ecommerce') || lowerKeyword.includes('online store')) return 'ecommerce';
+    if (lowerKeyword.includes('consulting') || lowerKeyword.includes('professional services')) return 'consulting';
+    if (lowerKeyword.includes('restaurant') || lowerKeyword.includes('food')) return 'food service';
+    if (lowerKeyword.includes('healthcare') || lowerKeyword.includes('medical')) return 'healthcare';
+    if (lowerKeyword.includes('small business')) return 'small business';
+    return 'business automation';
   }
 
   saveBlogPost(postData) {

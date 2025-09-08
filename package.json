@@ -14,12 +14,11 @@
     "blog:status": "node scripts/setup-cron.js status",
     "blog:config": "node scripts/daily-automation.js config show",
     "blog:report": "node scripts/daily-automation.js report",
-    
+    "blog:ai-test": "node scripts/ai-title-generator.js --full",
     "blog:git:generate": "node scripts/git-automation.js generate 1",
     "blog:git:generate:multiple": "node scripts/git-automation.js generate",
     "blog:git:commit": "node scripts/git-automation.js commit-only",
     "blog:git:status": "node scripts/git-automation.js status",
-    
     "sitemap:sync": "node scripts/sync-sitemap.js",
     "sitemap:preview": "node scripts/sync-sitemap.js --dry-run"
   },
@@ -29,5 +28,8 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "vite": "^7.0.4"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.2"
   }
 }

@@ -101,7 +101,7 @@ class DailyAutomation {
         this.log(`📖 Generating blog post: ${topic.title}`);
         
         try {
-          const postData = this.blogGenerator.generateBlogPost(topic);
+          const postData = await this.blogGenerator.generateBlogPost(topic);
           const savedFile = this.blogGenerator.saveBlogPost(postData);
           
           if (savedFile) {
@@ -110,10 +110,17 @@ class DailyAutomation {
             // Mark keyword as used
             this.keywordPlanner.markKeywordAsUsed(topic.keyword);
             
-            // Generate additional variations if configured
-            if (this.config.contentVariation === 'high') {
-              await this.generateVariations(postData, topic);
+            // Log AI generation status
+            if (postData.isAIGenerated) {
+              this.log(`🤖 Complete AI-generated article: ${postData.title}`);
+              this.log(`📊 Word count: ${postData.wordCount || postData.estimatedWords} words`);
+              this.log(`🎯 Sections: ${postData.outline.length} main sections`);
+            } else {
+              this.log(`⚠️ Used fallback generation: ${postData.fallbackReason || 'AI unavailable'}`);
             }
+            
+            // Note: Variation generation disabled to prevent duplicates
+            // AI title generator now handles uniqueness
             
             // Update sitemap and blog index
             this.updateSitemap(postData);

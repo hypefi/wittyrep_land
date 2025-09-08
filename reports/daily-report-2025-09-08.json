@@ -1,0 +1,31 @@
+{
+  "date": "2025-09-08",
+  "postsGenerated": 3,
+  "totalPosts": 20,
+  "keywordsUsed": 7,
+  "topicsGenerated": 2,
+  "config": {
+    "postsPerDay": 2,
+    "maxPostsInQueue": 30,
+    "autoPublish": false,
+    "notificationEmail": "",
+    "keywordsPerPost": 3,
+    "contentVariation": "high",
+    "seoOptimization": true,
+    "socialSharing": false
+  },
+  "generatedPosts": [
+    {
+      "filename": "blog-ai-generated-article-whatsapp-automation-marketing-automation-2025-09-08.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-ai-generated-article-whatsapp-automation-marketing-automation-2025-09-08.html"
+    },
+    {
+      "filename": "blog-leveraging-whatsapp-automation-for-a-stellar-back-to-school-campaign-2025-09-08.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-leveraging-whatsapp-automation-for-a-stellar-back-to-school-campaign-2025-09-08.html"
+    },
+    {
+      "filename": "blog-mastering-property-lead-generation-with-smart-automation-2025-09-08.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-mastering-property-lead-generation-with-smart-automation-2025-09-08.html"
+    }
+  ]
+}

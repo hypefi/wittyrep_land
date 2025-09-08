@@ -1,0 +1,10 @@
+{
+  "postsPerDay": "2",
+  "maxPostsInQueue": 30,
+  "autoPublish": false,
+  "notificationEmail": "",
+  "keywordsPerPost": 3,
+  "contentVariation": "high",
+  "seoOptimization": true,
+  "socialSharing": false
+}
