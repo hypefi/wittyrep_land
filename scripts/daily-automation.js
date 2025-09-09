@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import KeywordPlanner from './keyword-planner.js';
 import BlogPostGenerator from './blog-generator.js';
+import PostDeployer from './deploy-posts.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +14,7 @@ class DailyAutomation {
   constructor() {
     this.keywordPlanner = new KeywordPlanner();
     this.blogGenerator = new BlogPostGenerator();
+    this.postDeployer = new PostDeployer();
     this.config = this.loadConfig();
     this.logFile = path.join(__dirname, '../logs/automation.log');
   }
@@ -31,6 +33,7 @@ class DailyAutomation {
       postsPerDay: 1,
       maxPostsInQueue: 30,
       autoPublish: false,
+      autoDeploy: true, // Automatically deploy to dist/
       notificationEmail: '',
       keywordsPerPost: 3,
       contentVariation: 'high',
@@ -135,6 +138,11 @@ class DailyAutomation {
       }
 
       this.log('🎉 Daily blog post generation completed successfully!');
+      
+      // Deploy new posts to dist/ for live site
+      if (this.config.autoDeploy) {
+        await this.deployNewPosts();
+      }
       
       // Clean up old posts if needed
       this.cleanupOldPosts();
@@ -284,6 +292,16 @@ class DailyAutomation {
       
     } catch (error) {
       this.log(`⚠️ Error updating blog index: ${error.message}`, 'WARN');
+    }
+  }
+
+  async deployNewPosts() {
+    try {
+      this.log('🚀 Deploying new posts to live site...');
+      await this.postDeployer.deployNewPosts();
+      this.log('✅ Posts deployment completed');
+    } catch (error) {
+      this.log(`⚠️ Error deploying posts: ${error.message}`, 'WARN');
     }
   }
 
