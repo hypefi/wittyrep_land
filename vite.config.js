@@ -1,5 +1,27 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
+import { readdirSync } from 'fs'
+import { join } from 'path'
+
+// Dynamically get all blog posts
+function getBlogPosts() {
+  const postsDir = join(__dirname, 'posts')
+  const blogPosts = {}
+  
+  try {
+    const files = readdirSync(postsDir)
+    files.forEach(file => {
+      if (file.endsWith('.html')) {
+        const name = file.replace('.html', '')
+        blogPosts[name] = resolve(__dirname, `posts/${file}`)
+      }
+    })
+  } catch (error) {
+    console.warn('Could not read posts directory:', error.message)
+  }
+  
+  return blogPosts
+}
 
 export default defineConfig({
   publicDir: 'public',
@@ -13,11 +35,8 @@ export default defineConfig({
         fr: resolve(__dirname, 'fr.html'),
         'ar/index': resolve(__dirname, 'ar/index.html'),
         'fr/index': resolve(__dirname, 'fr/index.html'),
-        'blog-post-2025-06-25': resolve(__dirname, 'posts/blog_post_2025-06-25.html'),
-        'blog-whatsapp-automation-smb': resolve(__dirname, 'posts/blog-whatsapp-automation-smb.html'),
-        'blog-cost-manual-whatsapp-management': resolve(__dirname, 'posts/blog-cost-manual-whatsapp-management.html'),
-        'blog-real-estate-whatsapp-automation': resolve(__dirname, 'posts/blog-real-estate-whatsapp-automation.html'),
-        'blog-whatsapp-lead-generation-sequences': resolve(__dirname, 'posts/blog-whatsapp-lead-generation-sequences.html')
+        // Dynamically include all blog posts
+        ...getBlogPosts()
       }
     }
   }
