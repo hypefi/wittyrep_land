@@ -35,6 +35,8 @@ export default defineConfig({
         fr: resolve(__dirname, 'fr.html'),
         'ar/index': resolve(__dirname, 'ar/index.html'),
         'fr/index': resolve(__dirname, 'fr/index.html'),
+        'privacy-policy': resolve(__dirname, 'privacy-policy.html'),
+        'terms-of-service': resolve(__dirname, 'terms-of-service.html'),
         // Dynamically include all blog posts
         ...getBlogPosts()
       }
