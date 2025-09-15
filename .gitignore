@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+# Python virtual environments
+wittyreply_seo/keyword_env/

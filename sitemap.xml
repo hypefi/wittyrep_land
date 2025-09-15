@@ -4,7 +4,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://wittyrep.com/</loc>
-    <lastmod>2025-09-04</lastmod>
+    <lastmod>2025-09-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,14 +12,14 @@
   <!-- Language versions -->
   <url>
     <loc>https://wittyrep.com/ar.html</loc>
-    <lastmod>2025-09-04</lastmod>
+    <lastmod>2025-09-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
     <loc>https://wittyrep.com/fr.html</loc>
-    <lastmod>2025-09-04</lastmod>
+    <lastmod>2025-09-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -27,7 +27,7 @@
   <!-- Blog listing page -->
   <url>
     <loc>https://wittyrep.com/blog.html</loc>
-    <lastmod>2025-09-04</lastmod>
+    <lastmod>2025-09-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -35,22 +35,136 @@
   <!-- Legal pages -->
   <url>
     <loc>https://wittyrep.com/privacy-policy.html</loc>
-    <lastmod>2025-09-04</lastmod>
+    <lastmod>2025-09-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   
   <url>
     <loc>https://wittyrep.com/terms-of-service.html</loc>
-    <lastmod>2025-09-04</lastmod>
+    <lastmod>2025-09-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   
   <!-- Blog Posts -->
   <url>
+    <loc>https://wittyrep.com/posts/blog-ai-powered-ai-automation-examples-transform-your-business-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-ai-powered-whatsapp-ai-automation-transform-your-business-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-best-whatsapp-automation-software-expert-reviews-comparisons-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-business-whatsapp-automation-tools-features-benefits-guide-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://wittyrep.com/posts/blog-cost-manual-whatsapp-management.html</loc>
-    <lastmod>2025-09-04</lastmod>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-essential-whatsapp-automation-tools-every-business-needs-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-master-top-10-whatsapp-automation-software-for-business-growth-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-master-whatsapp-automation-program-for-business-growth-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-master-whatsapp-automation-software-for-business-growth-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-master-whatsapp-automation-tools-for-business-growth-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-powerful-whatsapp-marketing-automation-tools-for-modern-businesses-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-real-estate-whatsapp-automation.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-revolutionary-whatsapp-ai-tools-automate-your-customer-service-in-2024-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-top-whatsapp-automation-ai-tools-that-transform-business-communication-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-transform-your-marketing-with-whatsapp-automation-software-2025-09-13.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-whatsapp-automation-smb.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-whatsapp-lead-generation-sequences.html</loc>
+    <lastmod>2025-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-ai-generated-article-whatsapp-automation-marketing-automation-2025-09-08.html</loc>
+    <lastmod>2025-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-leveraging-whatsapp-automation-for-a-stellar-back-to-school-campaign-2025-09-08.html</loc>
+    <lastmod>2025-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://wittyrep.com/posts/blog-mastering-property-lead-generation-with-smart-automation-2025-09-08.html</loc>
+    <lastmod>2025-09-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -79,12 +193,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://wittyrep.com/posts/blog-real-estate-whatsapp-automation.html</loc>
-    <lastmod>2025-09-04</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://wittyrep.com/posts/blog-transform-your-customer-service-with-whatsapp-automation-a-complete-guide-complete-guide-2025-09-04.html</loc>
     <lastmod>2025-09-04</lastmod>
     <changefreq>monthly</changefreq>
@@ -92,18 +200,6 @@
   </url>
   <url>
     <loc>https://wittyrep.com/posts/blog-transform-your-customer-service-with-whatsapp-automation-a-complete-guide-pro-tips-2025-09-04.html</loc>
-    <lastmod>2025-09-04</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://wittyrep.com/posts/blog-whatsapp-automation-smb.html</loc>
-    <lastmod>2025-09-04</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://wittyrep.com/posts/blog-whatsapp-lead-generation-sequences.html</loc>
     <lastmod>2025-09-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -151,25 +247,4 @@
     <priority>0.6</priority>
   </url>
 
-
-  <url>
-    <loc>https://wittyreply.com/posts/ai-generated-article-whatsapp-automation-marketing-automation</loc>
-    <lastmod>2025-09-08</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <url>
-    <loc>https://wittyreply.com/posts/leveraging-whatsapp-automation-for-a-stellar-back-to-school-campaign</loc>
-    <lastmod>2025-09-08</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <url>
-    <loc>https://wittyreply.com/posts/mastering-property-lead-generation-with-smart-automation</loc>
-    <lastmod>2025-09-08</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
 </urlset>

@@ -149,11 +149,21 @@ class BlogPostGenerator {
     // Introduction
     sections.push(this.generateIntroduction(topic));
     
-    // Main content based on outline
+    // Main content sections with reduced spacing
+    const mainSections = [];
     topic.outline.forEach((sectionTitle, index) => {
       if (index === 0) return; // Skip intro as it's already generated
-      sections.push(this.generateSection(sectionTitle, topic, index));
+      mainSections.push(this.generateSection(sectionTitle, topic, index));
     });
+    
+    // Wrap main sections in container with reduced spacing
+    if (mainSections.length > 0) {
+      sections.push(`
+    <!-- Main Content Sections -->
+    <div class="space-y-6">
+      ${mainSections.join('\n')}
+    </div>`);
+    }
     
     // Conclusion
     sections.push(this.generateConclusion(topic));
@@ -228,11 +238,15 @@ class BlogPostGenerator {
     const sectionId = this.generateSectionId(sectionTitle);
     
     return `
-      <section class="section" id="${sectionId}">
+      <section class="main-content-section" id="section-${index}">
         <div class="container">
-          <div class="card">
-            <h2 class="text-3xl font-bold mb-6 gradient-text">${sectionTitle}</h2>
-            ${sectionContent}
+          <div class="max-w-4xl mx-auto">
+            <div class="card">
+              <h2 class="text-3xl font-bold gradient-text mb-6">${sectionTitle}</h2>
+              <div class="prose prose-invert prose-lg max-w-none">
+                ${sectionContent}
+              </div>
+            </div>
           </div>
         </div>
       </section>

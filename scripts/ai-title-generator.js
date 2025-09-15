@@ -401,20 +401,29 @@ Remember: Use only HTML content tags (h2, h3, p, ul, li, strong, em). Include em
     const sections = this.splitContentIntoSections(article.content);
     let structuredHTML = '';
     
+    // Wrap all sections in a container with reduced spacing
+    structuredHTML += '<div class="space-y-6">\n';
+    
     sections.forEach((section, index) => {
       const sectionId = this.generateSectionId(section.heading);
       
       structuredHTML += `
-      <section class="section" id="${sectionId}">
+      <section class="main-content-section" id="section-${index}">
         <div class="container">
-          <div class="card">
-            <h2 class="text-3xl font-bold mb-6 gradient-text">${section.heading}</h2>
-            ${section.content}
+          <div class="max-w-4xl mx-auto">
+            <div class="card">
+              <h2 class="text-3xl font-bold gradient-text mb-6">${section.heading}</h2>
+              <div class="prose prose-invert prose-lg max-w-none">
+                ${section.content}
+              </div>
+            </div>
           </div>
         </div>
       </section>
     `;
     });
+    
+    structuredHTML += '</div>';
     
     return structuredHTML;
   }
