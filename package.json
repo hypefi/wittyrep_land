@@ -18,6 +18,9 @@
     "blog:deploy": "node scripts/deploy-posts.js deploy",
     "blog:deploy:list": "node scripts/deploy-posts.js list",
     "blog:deploy:force": "node scripts/deploy-posts.js force-all",
+    "blog:enhanced": "node scripts/enhanced-blog-automation.js generate",
+    "blog:enhanced:multiple": "node scripts/enhanced-blog-automation.js generate-multiple",
+    "blog:enhanced:test": "node scripts/enhanced-blog-automation.js test-images",
     "blog:git:generate": "node scripts/git-automation.js generate 1",
     "blog:git:generate:multiple": "node scripts/git-automation.js generate",
     "blog:git:commit": "node scripts/git-automation.js commit-only",
@@ -33,6 +36,7 @@
     "vite": "^7.0.4"
   },
   "dependencies": {
-    "dotenv": "^17.2.2"
+    "dotenv": "^17.2.2",
+    "replicate": "^1.3.0"
   }
 }

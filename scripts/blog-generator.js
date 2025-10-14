@@ -4,6 +4,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import AIContentGenerator from './ai-title-generator.js';
+import ImageGenerator from './image-generator.js';
+import { getKeywords } from './keyword-config.js';
+import InternalLinker from './internal-linker.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +16,8 @@ class BlogPostGenerator {
     this.templates = this.loadTemplates();
     this.contentBlocks = this.loadContentBlocks();
     this.aiContentGenerator = new AIContentGenerator();
+    this.imageGenerator = new ImageGenerator();
+    this.internalLinker = new InternalLinker();
   }
 
   loadTemplates() {
@@ -77,15 +82,37 @@ class BlogPostGenerator {
     try {
       console.log(`🤖 Generating complete AI article for: ${topic.keyword}`);
       
-      // Generate complete article with OpenAI
+      // Generate complete article with OpenAI (4000 words)
       const article = await this.aiContentGenerator.generateCompleteArticle(topic.keyword, {
         industry: this.getIndustryFromKeyword(topic.keyword),
         difficulty: topic.difficulty || 'intermediate',
-        targetWords: topic.estimatedWords || 2000
+        targetWords: 4000 // Force 4000 words
       });
 
       // Structure the content for our template
       const structuredContent = this.aiContentGenerator.generateStructuredHTML(article);
+
+      // Generate images for the blog post
+      console.log(`🎨 Generating images for blog post...`);
+      const images = await this.imageGenerator.generateBlogImages({
+        title: article.title,
+        keyword: article.keyword,
+        description: article.description
+      }, structuredContent);
+
+      // Integrate images into content
+      const contentWithImages = this.integrateImagesIntoContent(structuredContent, images);
+
+      // Generate internal links
+      console.log(`🔗 Generating internal links...`);
+      const internalLinks = this.internalLinker.generateInternalLinks({
+        title: article.title,
+        keywords: [article.keyword],
+        slug: this.generateSlug(article.title)
+      }, 8);
+
+      // Insert internal links into content
+      const contentWithLinks = this.internalLinker.insertInternalLinks(contentWithImages, internalLinks);
 
       const postData = {
         title: article.title,
@@ -96,7 +123,7 @@ class BlogPostGenerator {
         estimatedWords: article.wordCount,
         publishDate: new Date().toISOString().split('T')[0],
         slug: this.generateSlug(article.title),
-        content: structuredContent,
+        content: contentWithLinks,
         meta: this.generateMeta({
           title: article.title,
           description: article.description,
@@ -104,10 +131,14 @@ class BlogPostGenerator {
         }),
         isAIGenerated: true,
         wordCount: article.wordCount,
-        rawContent: article.content // Keep original for debugging
+        rawContent: article.content, // Keep original for debugging
+        images: images,
+        hasImages: images.length > 0,
+        internalLinks: internalLinks,
+        linkCount: internalLinks.length
       };
 
-      console.log(`✅ AI article generated: "${article.title}" (${article.wordCount} words)`);
+      console.log(`✅ AI article generated: "${article.title}" (${article.wordCount} words, ${images.length} images)`);
       return postData;
       
     } catch (error) {
@@ -115,23 +146,124 @@ class BlogPostGenerator {
       console.log('🔄 Falling back to template-based generation...');
       
       // Fallback to original template-based method
-      const postData = {
-        title: topic.title,
+      const fallbackContent = this.generateContent({
+        title: topic.title || `Complete Guide to ${topic.keyword}`,
         keyword: topic.keyword,
-        description: topic.description,
-        outline: topic.outline,
-        difficulty: topic.difficulty,
-        estimatedWords: topic.estimatedWords,
+        description: topic.description || `Comprehensive guide to ${topic.keyword} for modern businesses`,
+        outline: topic.outline || ['Introduction', 'Benefits', 'Implementation', 'Conclusion']
+      });
+
+      // Generate internal links for fallback content too
+      console.log(`🔗 Generating internal links for fallback content...`);
+      const internalLinks = this.internalLinker.generateInternalLinks({
+        title: topic.title || `Complete Guide to ${topic.keyword}`,
+        keywords: [topic.keyword],
+        slug: this.generateSlug(topic.title || topic.keyword)
+      }, 6);
+
+      // Insert internal links into fallback content
+      const contentWithLinks = this.internalLinker.insertInternalLinks(fallbackContent, internalLinks);
+
+      const postData = {
+        title: topic.title || `Complete Guide to ${topic.keyword}`,
+        keyword: topic.keyword,
+        description: topic.description || `Comprehensive guide to ${topic.keyword} for modern businesses`,
+        outline: topic.outline || ['Introduction', 'Benefits', 'Implementation', 'Conclusion'],
+        difficulty: topic.difficulty || 'intermediate',
+        estimatedWords: topic.estimatedWords || 2000,
         publishDate: new Date().toISOString().split('T')[0],
-        slug: this.generateSlug(topic.title),
-        content: this.generateContent(topic),
-        meta: this.generateMeta(topic),
+        slug: this.generateSlug(topic.title || topic.keyword),
+        content: contentWithLinks,
+        meta: this.generateMeta({
+          title: topic.title || `Complete Guide to ${topic.keyword}`,
+          description: topic.description || `Comprehensive guide to ${topic.keyword} for modern businesses`,
+          keyword: topic.keyword
+        }),
         isAIGenerated: false,
-        fallbackReason: error.message
+        fallbackReason: error.message,
+        images: [],
+        hasImages: false,
+        internalLinks: internalLinks,
+        linkCount: internalLinks.length
       };
 
       return postData;
     }
+  }
+
+  integrateImagesIntoContent(content, images) {
+    if (!images || images.length === 0) {
+      return content;
+    }
+
+    let contentWithImages = content;
+    let imageIndex = 0;
+
+    // Add hero image after the first section
+    const heroImage = images.find(img => img.type === 'hero');
+    if (heroImage) {
+      const heroImageHTML = this.createImageHTML(heroImage, 'hero');
+      contentWithImages = contentWithImages.replace(
+        /(<section class="section">[\s\S]*?<\/section>)/,
+        `$1\n\n${heroImageHTML}`
+      );
+    }
+
+    // Add section images
+    const sectionImages = images.filter(img => img.type === 'section');
+    if (sectionImages.length > 0) {
+      // Find section breaks and add images
+      const sectionRegex = /(<h2[^>]*class="[^"]*gradient-text[^"]*"[^>]*>.*?<\/h2>[\s\S]*?)(?=<h2|$)/g;
+      contentWithImages = contentWithImages.replace(sectionRegex, (match, section) => {
+        if (imageIndex < sectionImages.length) {
+          const image = sectionImages[imageIndex];
+          const imageHTML = this.createImageHTML(image, 'section');
+          imageIndex++;
+          return section + '\n\n' + imageHTML + '\n\n';
+        }
+        return match;
+      });
+    }
+
+    // Add infographic at the end before conclusion
+    const infographicImage = images.find(img => img.type === 'infographic');
+    if (infographicImage) {
+      const infographicHTML = this.createImageHTML(infographicImage, 'infographic');
+      contentWithImages = contentWithImages.replace(
+        /(<section class="section">[\s\S]*?<h2[^>]*>Conclusion<\/h2>)/,
+        `${infographicHTML}\n\n$1`
+      );
+    }
+
+    return contentWithImages;
+  }
+
+  createImageHTML(image, type) {
+    const containerClass = type === 'hero' ? 'hero-image-container' : 
+                          type === 'infographic' ? 'infographic-container' : 
+                          'section-image-container';
+    
+    const imageClass = type === 'hero' ? 'hero-image' : 
+                      type === 'infographic' ? 'infographic-image' : 
+                      'section-image';
+
+    return `
+      <section class="image-section">
+        <div class="container">
+          <div class="max-w-4xl mx-auto">
+            <div class="${containerClass}">
+              <img 
+                src="${image.url}" 
+                alt="${image.alt}" 
+                class="${imageClass} rounded-lg shadow-lg"
+                loading="lazy"
+              />
+              ${image.caption ? `<p class="image-caption text-center text-gray-400 text-sm mt-4">${image.caption}</p>` : ''}
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
   }
 
   generateSlug(title) {
@@ -495,18 +627,8 @@ class BlogPostGenerator {
   }
 
   generateKeywords(primaryKeyword) {
-    const baseKeywords = [
-      'whatsapp automation',
-      'business automation',
-      'customer service automation',
-      'lead generation',
-      'business efficiency',
-      'digital marketing',
-      'customer engagement'
-    ];
-    
-    const allKeywords = [primaryKeyword, ...baseKeywords];
-    return allKeywords.join(', ');
+    // Use the centralized keyword configuration
+    return getKeywords(primaryKeyword);
   }
 
   generateSectionId(title) {

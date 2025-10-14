@@ -286,16 +286,19 @@ Format your response as a numbered list:
     const difficulty = context.difficulty || 'intermediate';
     const targetWords = context.targetWords || this.targetWords;
     
-    return `You are writing a blog post about "${keyword}" for ${industryContext}. 
+    return `You are writing a comprehensive, in-depth blog post about "${keyword}" for ${industryContext}. 
 
 CRITICAL: You must follow the EXACT format below. Do not include DOCTYPE, html, head, or body tags.
 
 REQUIREMENTS:
 - Target audience: ${difficulty} level professionals  
-- Article length: ${targetWords} words approximately
-- SEO optimized with natural keyword integration
-- Include actionable insights and practical tips
-- Use engaging, conversational tone
+- Article length: EXACTLY ${targetWords} words (this is critical - make it comprehensive and detailed)
+- SEO optimized with natural keyword integration throughout
+- Include actionable insights, practical tips, and real-world examples
+- Use engaging, conversational tone with personal anecdotes where appropriate
+- Structure with clear headings and subheadings for readability
+- Include statistics, case studies, and data points to support claims
+- Make each section substantial and valuable
 
 AVOID these overused titles:
 ${this.usedTitles.slice(-10).map(title => `- ${title}`).join('\n')}
@@ -308,24 +311,40 @@ DESCRIPTION: [SEO meta description 140-160 characters - no HTML tags]
 
 CONTENT:
 <h2>🚀 Introduction</h2>
-<p>Your engaging introduction paragraph that hooks the reader...</p>
+<p>Your comprehensive introduction that hooks the reader and sets the stage for the detailed content to follow. Make this substantial and engaging...</p>
 
-<h2>💡 Main Section Title</h2>
-<p>Your content here with proper HTML formatting...</p>
+<h2>💡 Understanding the Fundamentals</h2>
+<p>Deep dive into the core concepts with detailed explanations...</p>
 <ul>
-<li>Bullet point 1</li>
-<li>Bullet point 2</li>
+<li>Detailed bullet point 1 with explanations</li>
+<li>Detailed bullet point 2 with examples</li>
+<li>Detailed bullet point 3 with actionable insights</li>
 </ul>
 
-<h2>🎯 Another Main Section</h2>
-<p>More valuable content...</p>
+<h2>🎯 Advanced Strategies and Implementation</h2>
+<p>Comprehensive coverage of advanced strategies with step-by-step guidance...</p>
 
-<h2>✅ Conclusion and Next Steps</h2>
-<p>Wrap up with actionable next steps...</p>
+<h2>📊 Real-World Examples and Case Studies</h2>
+<p>Detailed case studies and real-world examples to illustrate concepts...</p>
 
-OUTLINE: Section 1, Section 2, Section 3, Conclusion
+<h2>🛠️ Tools, Resources, and Best Practices</h2>
+<p>Comprehensive list of tools and resources with detailed explanations...</p>
 
-Remember: Use only HTML content tags (h2, h3, p, ul, li, strong, em). Include emojis in headings. Make it scannable and valuable.`;
+<h2>⚠️ Common Pitfalls and How to Avoid Them</h2>
+<p>Detailed discussion of common mistakes and how to prevent them...</p>
+
+<h2>📈 Measuring Success and ROI</h2>
+<p>Comprehensive guide to measuring success with specific metrics and KPIs...</p>
+
+<h2>🔮 Future Trends and What's Next</h2>
+<p>Insights into future trends and what to expect in the coming years...</p>
+
+<h2>✅ Conclusion and Actionable Next Steps</h2>
+<p>Comprehensive wrap-up with specific, actionable next steps the reader can take immediately...</p>
+
+OUTLINE: Introduction, Understanding Fundamentals, Advanced Strategies, Real-World Examples, Tools and Resources, Common Pitfalls, Measuring Success, Future Trends, Conclusion
+
+Remember: Use only HTML content tags (h2, h3, p, ul, li, strong, em, blockquote). Include emojis in headings. Make it comprehensive, scannable, and extremely valuable. Each section should be substantial with detailed explanations, examples, and actionable insights.`;
   }
 
   parseArticleResponse(response, keyword) {
