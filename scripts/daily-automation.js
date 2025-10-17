@@ -6,6 +6,10 @@ import { fileURLToPath } from 'url';
 import KeywordPlanner from './keyword-planner.js';
 import BlogPostGenerator from './blog-generator.js';
 import PostDeployer from './deploy-posts.js';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -399,6 +403,7 @@ class DailyAutomation {
     
     try {
       await this.generateDailyPosts();
+      await this.updateBlogOrganization();
       this.log('✅ Scheduled task completed successfully');
     } catch (error) {
       this.log(`❌ Scheduled task failed: ${error.message}`, 'ERROR');
@@ -407,6 +412,24 @@ class DailyAutomation {
       if (this.config.notificationEmail) {
         await this.sendNotification(error.message);
       }
+    }
+  }
+
+  /**
+   * Update blog organization after new posts are added
+   */
+  async updateBlogOrganization() {
+    try {
+      this.log('🔄 Updating blog organization...');
+      const { stdout, stderr } = await execAsync('node scripts/update-blog-organization.js');
+      
+      if (stderr) {
+        this.log(`⚠️ Blog organization warning: ${stderr}`, 'WARN');
+      } else {
+        this.log('✅ Blog organization updated successfully');
+      }
+    } catch (error) {
+      this.log(`❌ Blog organization failed: ${error.message}`, 'ERROR');
     }
   }
 
@@ -453,6 +476,10 @@ class DailyAutomation {
         this.cleanupOldPosts();
         break;
         
+      case 'organize':
+        await this.updateBlogOrganization();
+        break;
+        
       default:
         console.log(`
 🚀 WittyReply Daily Blog Automation
@@ -463,6 +490,7 @@ Usage:
   node daily-automation.js config set <k> <v> - Set configuration value
   node daily-automation.js report            - Generate daily report
   node daily-automation.js cleanup           - Clean up old posts
+  node daily-automation.js organize          - Update blog organization
 
 Examples:
   node daily-automation.js generate 3        - Generate 3 posts today
