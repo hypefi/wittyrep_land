@@ -26,29 +26,23 @@ class ImageGenerator {
 
   async generateImage(prompt, options = {}) {
     try {
-      console.log(`🎨 Generating image: "${prompt}"`);
+      console.log(`🎨 Generating image with Nano Banana: "${prompt}"`);
       
       const input = {
-        prompt: prompt,
-        go_fast: options.goFast !== false,
-        guidance: options.guidance || 3.5,
-        megapixels: options.megapixels || "1",
-        num_outputs: options.numOutputs || 1,
-        aspect_ratio: options.aspectRatio || "16:9",
-        output_format: options.outputFormat || "webp",
-        output_quality: options.outputQuality || 80,
-        prompt_strength: options.promptStrength || 0.8,
-        num_inference_steps: options.numInferenceSteps || 28
+        prompt: prompt
       };
 
-      const output = await this.replicate.run("black-forest-labs/flux-dev", { input });
+      // Use Nano Banana instead of Flux Dev
+      const output = await this.replicate.run("google/nano-banana", { input });
       
-      if (!output || !output[0]) {
+      if (!output) {
         throw new Error('No image generated');
       }
 
+      // Nano Banana returns an object with url() method
+      const imageUrl = await output.url();
+      
       // Download and save the image
-      const imageUrl = output[0];
       const imageBuffer = await this.downloadImage(imageUrl);
       
       // Generate filename
