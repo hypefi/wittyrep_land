@@ -7,17 +7,29 @@ import AIContentGenerator from './ai-title-generator.js';
 import ImageGenerator from './image-generator.js';
 import { getKeywords } from './keyword-config.js';
 import InternalLinker from './internal-linker.js';
+import ConfigManager from './config-manager.js';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 class BlogPostGenerator {
-  constructor() {
+  constructor(config = {}) {
+    this.configManager = new ConfigManager();
+    this.config = config.config || this.configManager.getConfig();
+    this.wittyReplyMode = this.config.features?.wittyReplyBranding || false;
+    this.enhancementLevel = this.config.features?.contentEnhancement || 'standard';
     this.templates = this.loadTemplates();
     this.contentBlocks = this.loadContentBlocks();
+    this.enhancementData = this.loadEnhancementData();
     this.aiContentGenerator = new AIContentGenerator();
     this.imageGenerator = new ImageGenerator();
     this.internalLinker = new InternalLinker();
+    this.keywordData = [];
+    this.generatedArticles = [];
   }
 
   loadTemplates() {
@@ -78,41 +90,152 @@ class BlogPostGenerator {
     };
   }
 
-  async generateBlogPost(topic) {
+  loadEnhancementData() {
+    const baseEnhancements = {
+      heroSections: {
+        'ai tool': {
+          icon: '🤖',
+          gradient: 'from-blue-600 to-purple-600',
+          bgPattern: 'circuit',
+          stats: ['50+ AI Tools Reviewed', '95% Accuracy Rate', '24/7 Automation'],
+          visual: 'ai-dashboard'
+        },
+        'software': {
+          icon: '⚙️',
+          gradient: 'from-green-600 to-teal-600', 
+          bgPattern: 'grid',
+          stats: ['100+ Software Solutions', '99.9% Uptime', '3-Min Setup'],
+          visual: 'software-interface'
+        },
+        'marketing': {
+          icon: '📈',
+          gradient: 'from-pink-600 to-rose-600',
+          bgPattern: 'waves',
+          stats: ['300% ROI Increase', '10M+ Messages Sent', '50K+ Businesses'],
+          visual: 'marketing-dashboard'
+        },
+        'business': {
+          icon: '💼',
+          gradient: 'from-indigo-600 to-blue-600',
+          bgPattern: 'dots',
+          stats: ['500+ Businesses Served', '40% Cost Reduction', '24/7 Support'],
+          visual: 'business-metrics'
+        },
+        'automation': {
+          icon: '⚡',
+          gradient: 'from-yellow-600 to-orange-600',
+          bgPattern: 'hexagon',
+          stats: ['1000+ Workflows', '80% Time Saved', 'Zero Downtime'],
+          visual: 'automation-flow'
+        }
+      }
+    };
+
+    const wittyReplyEnhancements = {
+      wittyReplyInfo: {
+        productName: "WittyReply",
+        tagline: "AI-Powered WhatsApp Automation Solution",
+        description: "WittyReply is the leading AI-powered WhatsApp automation platform that helps businesses automate customer interactions, generate leads, and scale their operations with intelligent AI agents.",
+        website: "https://wittyreply.com",
+        keyFeatures: [
+          "AI-Powered Conversations",
+          "Multi-Agent System", 
+          "Lead Generation Automation",
+          "Customer Service Automation",
+          "Sales Process Automation",
+          "Analytics & Reporting",
+          "Easy Integration",
+          "24/7 Availability"
+        ],
+        benefits: [
+          "Increase lead generation by 300%",
+          "Reduce response time to under 30 seconds", 
+          "Handle unlimited conversations simultaneously",
+          "Integrate with 100+ business tools",
+          "Scale without hiring additional staff",
+          "Improve customer satisfaction scores",
+          "Generate qualified leads automatically",
+          "Reduce operational costs by 60%"
+        ],
+        useCases: [
+          "Real Estate Lead Generation",
+          "E-commerce Customer Support", 
+          "Restaurant Order Management",
+          "Healthcare Appointment Scheduling",
+          "Education Course Inquiries",
+          "Professional Services Consultation",
+          "Event Management",
+          "SaaS Customer Onboarding"
+        ],
+        competitors: [
+          "Chatfuel",
+          "ManyChat", 
+          "Landbot",
+          "Tidio",
+          "Intercom",
+          "Zendesk Chat"
+        ],
+        pricing: {
+          starter: "$29/month",
+          professional: "$79/month", 
+          enterprise: "Custom pricing"
+        }
+      }
+    };
+
+    return this.wittyReplyMode 
+      ? { ...baseEnhancements, ...wittyReplyEnhancements }
+      : baseEnhancements;
+  }
+
+  async generateBlogPost(topic, options = {}) {
     try {
       console.log(`🤖 Generating complete AI article for: ${topic.keyword}`);
       
-      // Generate complete article with OpenAI (4000 words)
+      // Generate complete article with OpenAI
+      const targetWords = options.targetWords || this.config.generation?.targetWords || 4000;
       const article = await this.aiContentGenerator.generateCompleteArticle(topic.keyword, {
         industry: this.getIndustryFromKeyword(topic.keyword),
         difficulty: topic.difficulty || 'intermediate',
-        targetWords: 4000 // Force 4000 words
+        targetWords: targetWords
       });
 
       // Structure the content for our template
       const structuredContent = this.aiContentGenerator.generateStructuredHTML(article);
 
+      // Enhance content with WittyReply branding if enabled
+      let enhancedContent = structuredContent;
+      if (this.wittyReplyMode && this.enhancementLevel !== 'none') {
+        enhancedContent = this.enhanceContentWithWittyReply(structuredContent, topic.keyword);
+      }
+
       // Generate images for the blog post
-      console.log(`🎨 Generating images for blog post...`);
-      const images = await this.imageGenerator.generateBlogImages({
-        title: article.title,
-        keyword: article.keyword,
-        description: article.description
-      }, structuredContent);
+      let images = [];
+      if (this.config.features?.imageGeneration) {
+        console.log(`🎨 Generating images for blog post...`);
+        images = await this.imageGenerator.generateBlogImages({
+          title: article.title,
+          keyword: article.keyword,
+          description: article.description
+        }, enhancedContent);
+      }
 
       // Integrate images into content
-      const contentWithImages = this.integrateImagesIntoContent(structuredContent, images);
+      const contentWithImages = this.integrateImagesIntoContent(enhancedContent, images);
 
       // Generate internal links
-      console.log(`🔗 Generating internal links...`);
-      const internalLinks = this.internalLinker.generateInternalLinks({
-        title: article.title,
-        keywords: [article.keyword],
-        slug: this.generateSlug(article.title)
-      }, 8);
+      let internalLinks = [];
+      if (this.config.features?.internalLinking) {
+        console.log(`🔗 Generating internal links...`);
+        internalLinks = this.internalLinker.generateInternalLinks({
+          title: article.title,
+          keywords: [article.keyword],
+          slug: this.generateSlug(article.title)
+        }, 8);
 
-      // Insert internal links into content
-      const contentWithLinks = this.internalLinker.insertInternalLinks(contentWithImages, internalLinks);
+        // Insert internal links into content
+        const contentWithLinks = this.internalLinker.insertInternalLinks(contentWithImages, internalLinks);
+      }
 
       const postData = {
         title: article.title,
@@ -123,7 +246,7 @@ class BlogPostGenerator {
         estimatedWords: article.wordCount,
         publishDate: new Date().toISOString().split('T')[0],
         slug: this.generateSlug(article.title),
-        content: contentWithLinks,
+        content: contentWithImages,
         meta: this.generateMeta({
           title: article.title,
           description: article.description,
@@ -131,11 +254,13 @@ class BlogPostGenerator {
         }),
         isAIGenerated: true,
         wordCount: article.wordCount,
-        rawContent: article.content, // Keep original for debugging
+        rawContent: article.content,
         images: images,
         hasImages: images.length > 0,
         internalLinks: internalLinks,
-        linkCount: internalLinks.length
+        linkCount: internalLinks.length,
+        wittyReplyMode: this.wittyReplyMode,
+        enhancementLevel: this.enhancementLevel
       };
 
       console.log(`✅ AI article generated: "${article.title}" (${article.wordCount} words, ${images.length} images)`);
@@ -143,52 +268,208 @@ class BlogPostGenerator {
       
     } catch (error) {
       console.error('❌ Error generating AI content:', error.message);
-      console.log('🔄 Falling back to template-based generation...');
-      
-      // Fallback to original template-based method
-      const fallbackContent = this.generateContent({
-        title: topic.title || `Complete Guide to ${topic.keyword}`,
-        keyword: topic.keyword,
-        description: topic.description || `Comprehensive guide to ${topic.keyword} for modern businesses`,
-        outline: topic.outline || ['Introduction', 'Benefits', 'Implementation', 'Conclusion']
-      });
-
-      // Generate internal links for fallback content too
-      console.log(`🔗 Generating internal links for fallback content...`);
-      const internalLinks = this.internalLinker.generateInternalLinks({
-        title: topic.title || `Complete Guide to ${topic.keyword}`,
-        keywords: [topic.keyword],
-        slug: this.generateSlug(topic.title || topic.keyword)
-      }, 6);
-
-      // Insert internal links into fallback content
-      const contentWithLinks = this.internalLinker.insertInternalLinks(fallbackContent, internalLinks);
-
-      const postData = {
-        title: topic.title || `Complete Guide to ${topic.keyword}`,
-        keyword: topic.keyword,
-        description: topic.description || `Comprehensive guide to ${topic.keyword} for modern businesses`,
-        outline: topic.outline || ['Introduction', 'Benefits', 'Implementation', 'Conclusion'],
-        difficulty: topic.difficulty || 'intermediate',
-        estimatedWords: topic.estimatedWords || 2000,
-        publishDate: new Date().toISOString().split('T')[0],
-        slug: this.generateSlug(topic.title || topic.keyword),
-        content: contentWithLinks,
-        meta: this.generateMeta({
-          title: topic.title || `Complete Guide to ${topic.keyword}`,
-          description: topic.description || `Comprehensive guide to ${topic.keyword} for modern businesses`,
-          keyword: topic.keyword
-        }),
-        isAIGenerated: false,
-        fallbackReason: error.message,
-        images: [],
-        hasImages: false,
-        internalLinks: internalLinks,
-        linkCount: internalLinks.length
-      };
-
-      return postData;
+      throw error; // Re-throw error instead of falling back to templates
     }
+  }
+
+  // CSV keyword loading functionality (from whatsapp-ai-blog-generator.js)
+  loadKeywordsFromCSV(csvPath) {
+    try {
+      const fullPath = path.join(__dirname, '..', csvPath);
+      const csvContent = fs.readFileSync(fullPath, 'utf8');
+      
+      const lines = csvContent.split('\n');
+      const keywords = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line && !line.startsWith(',')) {
+          const values = line.split(',');
+          if (values.length >= 6) {
+            keywords.push({
+              keyword: values[0].trim(),
+              competition: values[1].trim(),
+              competitionScore: parseFloat(values[2]) || 0,
+              opportunityScore: parseFloat(values[3]) || 0,
+              difficultyScore: parseFloat(values[4]) || 0,
+              recommendation: values[5].trim()
+            });
+          }
+        }
+      }
+
+      console.log(`📊 Loaded ${keywords.length} keywords from CSV`);
+      this.keywordData = keywords;
+      return keywords;
+    } catch (error) {
+      console.error('Error loading keyword data:', error);
+      return [];
+    }
+  }
+
+  // WittyReply content enhancement methods
+  enhanceContentWithWittyReply(content, keyword) {
+    let enhancedContent = content;
+
+    // Add WittyReply mentions based on keyword context
+    if (keyword.includes('best') || keyword.includes('platform') || keyword.includes('comparison')) {
+      enhancedContent = this.addWittyReplyComparison(content);
+    } else if (keyword.includes('free') || keyword.includes('trial')) {
+      enhancedContent = this.addWittyReplyFreeTrial(content);
+    } else if (keyword.includes('create') || keyword.includes('how to') || keyword.includes('tutorial')) {
+      enhancedContent = this.addWittyReplyTutorial(content);
+    } else if (keyword.includes('ai') || keyword.includes('chatbot') || keyword.includes('bot')) {
+      enhancedContent = this.addWittyReplyAI(content);
+    } else {
+      enhancedContent = this.addWittyReplyGeneral(content);
+    }
+
+    return enhancedContent;
+  }
+
+  addWittyReplyComparison(content) {
+    const wittyReplyInfo = this.enhancementData.wittyReplyInfo;
+    const comparisonSection = `
+
+## Why WittyReply Leads the WhatsApp Automation Market
+
+When comparing WhatsApp automation platforms, **WittyReply** consistently emerges as the top choice for businesses serious about AI-powered communication. Here's why:
+
+### Advanced AI Technology
+Unlike basic chatbot platforms, WittyReply uses sophisticated AI agents that understand context, learn from conversations, and provide intelligent responses that feel genuinely human.
+
+### Multi-Agent System
+WittyReply's unique multi-agent architecture allows you to deploy specialized AI agents for different business functions:
+- **Lead Generation Agent**: Qualifies prospects and captures contact information
+- **Customer Service Agent**: Handles inquiries and provides support
+- **Sales Agent**: Guides prospects through your sales funnel
+
+### Key Differentiators
+- **${wittyReplyInfo.benefits[0]}**
+- **${wittyReplyInfo.benefits[1]}**
+- **${wittyReplyInfo.benefits[2]}**
+
+Ready to experience the difference? [Start your free trial with WittyReply](${wittyReplyInfo.website}) today.`;
+
+    return content + comparisonSection;
+  }
+
+  addWittyReplyFreeTrial(content) {
+    const wittyReplyInfo = this.enhancementData.wittyReplyInfo;
+    const trialSection = `
+
+## Get Started with WittyReply Today
+
+Experience the power of AI-powered WhatsApp automation with WittyReply's free trial. No credit card required, no setup fees, just results.
+
+### What You Get in Your Free Trial:
+- **Full access to all AI agents**
+- **Up to 1,000 messages per month**
+- **Complete analytics dashboard**
+- **24/7 customer support**
+- **Easy integration with your existing tools**
+
+### Pricing That Scales With You:
+- **Starter Plan**: ${wittyReplyInfo.pricing.starter} - Perfect for small businesses
+- **Professional Plan**: ${wittyReplyInfo.pricing.professional} - Advanced features for growing companies
+- **Enterprise Plan**: ${wittyReplyInfo.pricing.enterprise} - Custom solutions for large organizations
+
+[Start Your Free Trial Now](${wittyReplyInfo.website}) and see why thousands of businesses trust WittyReply for their WhatsApp automation needs.`;
+
+    return content + trialSection;
+  }
+
+  addWittyReplyTutorial(content) {
+    const wittyReplyInfo = this.enhancementData.wittyReplyInfo;
+    const tutorialSection = `
+
+## How to Set Up WittyReply in Minutes
+
+Getting started with WittyReply is incredibly simple. Here's your step-by-step guide:
+
+### Step 1: Create Your Account
+Visit [WittyReply.com](${wittyReplyInfo.website}) and sign up for your free account. No credit card required.
+
+### Step 2: Connect Your WhatsApp Business Account
+WittyReply integrates seamlessly with WhatsApp Business API. Follow our guided setup process.
+
+### Step 3: Configure Your AI Agents
+Choose from pre-built agent templates or create custom agents for your specific needs:
+- Lead generation workflows
+- Customer service automation
+- Sales process optimization
+
+### Step 4: Test and Launch
+Test your automation flows with real customers, then launch with confidence.
+
+### Pro Tips for Success:
+- Start with simple automations and gradually increase complexity
+- Use WittyReply's analytics to optimize your conversations
+- Leverage the multi-agent system for different business functions
+
+Ready to transform your WhatsApp communication? [Get started with WittyReply](${wittyReplyInfo.website}) today.`;
+
+    return content + tutorialSection;
+  }
+
+  addWittyReplyAI(content) {
+    const wittyReplyInfo = this.enhancementData.wittyReplyInfo;
+    const aiSection = `
+
+## The Future of WhatsApp Automation: AI-Powered Intelligence
+
+WittyReply represents the next generation of WhatsApp automation, powered by advanced artificial intelligence that goes far beyond simple chatbots.
+
+### What Makes WittyReply's AI Different?
+
+**Contextual Understanding**: Our AI agents don't just respond to keywords—they understand the full context of conversations, including previous interactions and customer history.
+
+**Learning Capabilities**: WittyReply's AI continuously learns from your conversations, improving responses and adapting to your business needs over time.
+
+**Multi-Agent Intelligence**: Deploy specialized AI agents for different functions, each optimized for specific tasks and customer interactions.
+
+### Real-World AI Applications:
+- **Intelligent Lead Qualification**: AI agents ask the right questions to identify high-value prospects
+- **Contextual Customer Support**: Understand customer issues and provide relevant solutions
+- **Sales Process Automation**: Guide prospects through your sales funnel with intelligent conversations
+
+### The WittyReply Advantage:
+- **${wittyReplyInfo.benefits[0]}**
+- **${wittyReplyInfo.benefits[1]}**
+- **${wittyReplyInfo.benefits[2]}**
+
+Experience the power of AI-driven WhatsApp automation. [Try WittyReply free](${wittyReplyInfo.website}) and see the difference intelligent automation makes.`;
+
+    return content + aiSection;
+  }
+
+  addWittyReplyGeneral(content) {
+    const wittyReplyInfo = this.enhancementData.wittyReplyInfo;
+    const generalSection = `
+
+## Transform Your Business with WittyReply
+
+Ready to take your WhatsApp automation to the next level? WittyReply offers the most advanced AI-powered automation platform available today.
+
+### Why Choose WittyReply?
+
+**Proven Results**: Thousands of businesses trust WittyReply to handle their WhatsApp communication, with measurable improvements in:
+- Customer satisfaction scores
+- Lead generation rates
+- Operational efficiency
+- Cost reduction
+
+**Comprehensive Solution**: From lead generation to customer support, WittyReply's multi-agent system handles every aspect of your WhatsApp communication.
+
+**Easy Integration**: Connect WittyReply with your existing business tools and workflows in minutes, not hours.
+
+### Get Started Today
+
+Join the businesses already using WittyReply to revolutionize their WhatsApp communication. [Start your free trial](${wittyReplyInfo.website}) and experience the difference AI-powered automation makes.
+
+**No credit card required. No setup fees. Just results.**`;
+
+    return content + generalSection;
   }
 
   integrateImagesIntoContent(content, images) {
@@ -700,6 +981,509 @@ class BlogPostGenerator {
       return null;
     }
   }
+
+  // Enhanced CLI interface with all modes
+  async runCLI() {
+    const args = process.argv.slice(2);
+    const command = args[0];
+    const param = args[1];
+    const value = args[2];
+
+    switch (command) {
+      case 'generate':
+        const keyword = param || this.config.keywords[0];
+        await this.generateEnhancedBlogPost(keyword);
+        break;
+
+      case 'generate-multiple':
+        const count = parseInt(param) || 3;
+        await this.generateMultiplePosts(count);
+        break;
+
+      case 'generate-csv':
+        const priority = param || 'high';
+        const csvCount = parseInt(value) || 3;
+        await this.generateFromCSV(priority, csvCount);
+        break;
+
+      case 'generate-wittyreply':
+        const wrKeyword = param || this.config.keywords[0];
+        await this.generateWithWittyReplyBranding(wrKeyword);
+        break;
+
+      case 'test-images':
+        await this.testImageGeneration();
+        break;
+
+      case 'config':
+        console.log('\n📋 Current Configuration:');
+        console.log(JSON.stringify(this.config, null, 2));
+        break;
+
+      case 'load-csv':
+        const csvPath = param || this.config.csvKeywordPath;
+        this.loadKeywordsFromCSV(csvPath);
+        break;
+
+      case 'analyze-keywords':
+        this.analyzeKeywords();
+        break;
+
+      default:
+        console.log(`
+🚀 Unified Blog Post Generator
+
+Usage:
+  node blog-generator.js generate [keyword]           - Generate single blog post
+  node blog-generator.js generate-multiple [count]    - Generate multiple posts
+  node blog-generator.js generate-csv [priority] [n]  - Generate from CSV keywords
+  node blog-generator.js generate-wittyreply [keyword] - Generate with WittyReply branding
+  node blog-generator.js test-images                   - Test image generation
+  node blog-generator.js config                        - Show current configuration
+  node blog-generator.js load-csv [path]               - Load keywords from CSV
+  node blog-generator.js analyze-keywords              - Analyze loaded keywords
+
+Examples:
+  node blog-generator.js generate "whatsapp automation"
+  node blog-generator.js generate-multiple 5
+  node blog-generator.js generate-csv high 3
+  node blog-generator.js generate-wittyreply "best whatsapp chatbot"
+  node blog-generator.js load-csv wittyreply_seo/whatsapp_ai_ENHANCED.csv
+
+Features:
+  ✨ AI-powered content generation (4000+ words)
+  🎨 Automatic image generation
+  🔗 Smart internal linking
+  🎯 WittyReply branding integration
+  📊 CSV keyword support
+  📱 Mobile-optimized output
+  🔧 Configurable features
+
+Environment Variables Required:
+  OPENAI_API_KEY     - For content generation
+  REPLICATE_API_TOKEN - For image generation (optional)
+        `);
+    }
+  }
+
+  // Enhanced blog post generation (from enhanced-blog-automation.js)
+  async generateEnhancedBlogPost(keyword, options = {}) {
+    try {
+      console.log(`\n🚀 Starting enhanced blog generation for: "${keyword}"`);
+      console.log('=' .repeat(60));
+      
+      // Validate API keys
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OPENAI_API_KEY is required for content generation');
+      }
+      
+      if (!process.env.REPLICATE_API_TOKEN) {
+        console.warn('⚠️  REPLICATE_API_TOKEN not found - images will be skipped');
+      }
+
+      const startTime = Date.now();
+      
+      // Generate the blog post
+      const topic = {
+        keyword: keyword,
+        title: this.generateTitleFromKeyword(keyword),
+        description: `Comprehensive guide to ${keyword} for modern businesses`,
+        difficulty: 'intermediate',
+        estimatedWords: this.config.generation?.targetWords || 4000
+      };
+
+      const postData = await this.generateBlogPost(topic, options);
+      
+      const generationTime = ((Date.now() - startTime) / 1000).toFixed(2);
+      
+      // Save the blog post
+      const filepath = this.saveBlogPost(postData);
+      
+      if (filepath) {
+        console.log(`\n✅ Enhanced blog post generated successfully!`);
+        console.log(`📝 Title: ${postData.title}`);
+        console.log(`📊 Word Count: ${postData.wordCount} words`);
+        console.log(`🎨 Images: ${postData.images ? postData.images.length : 0} generated`);
+        console.log(`🔗 Internal Links: ${postData.linkCount || 0} added`);
+        console.log(`⏱️  Generation Time: ${generationTime}s`);
+        console.log(`📁 Saved to: ${filepath}`);
+        
+        // Generate summary report
+        this.generateSummaryReport(postData, generationTime);
+        
+        return {
+          success: true,
+          postData,
+          filepath,
+          generationTime: parseFloat(generationTime)
+        };
+      } else {
+        throw new Error('Failed to save blog post');
+      }
+      
+    } catch (error) {
+      console.error(`❌ Error generating enhanced blog post: ${error.message}`);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Generate multiple posts (from enhanced-blog-automation.js)
+  async generateMultiplePosts(count = 3) {
+    console.log(`\n🚀 Generating ${count} enhanced blog posts...`);
+    console.log('=' .repeat(60));
+    
+    const results = [];
+    const keywords = this.config.keywords.slice(0, count);
+    
+    for (let i = 0; i < keywords.length; i++) {
+      const keyword = keywords[i];
+      console.log(`\n📝 Generating post ${i + 1}/${count}: "${keyword}"`);
+      
+      try {
+        const result = await this.generateEnhancedBlogPost(keyword);
+        results.push(result);
+        
+        // Add delay between posts to avoid rate limiting
+        if (i < keywords.length - 1) {
+          console.log('⏳ Waiting 30 seconds before next post...');
+          await new Promise(resolve => setTimeout(resolve, 30000));
+        }
+        
+      } catch (error) {
+        console.error(`❌ Failed to generate post for "${keyword}": ${error.message}`);
+        results.push({
+          success: false,
+          keyword,
+          error: error.message
+        });
+      }
+    }
+    
+    // Generate final summary
+    this.generateFinalSummary(results);
+    
+    return results;
+  }
+
+  // Generate from CSV keywords (from whatsapp-ai-blog-generator.js)
+  async generateFromCSV(priorityLevel = 'high', maxArticles = 5, options = {}) {
+    if (this.keywordData.length === 0) {
+      console.log('📊 Loading keywords from CSV...');
+      this.loadKeywordsFromCSV(this.config.csvKeywordPath);
+    }
+
+    const prioritized = this.prioritizeKeywords();
+    const keywordsToProcess = prioritized[priorityLevel].slice(0, maxArticles);
+
+    console.log(`\n🚀 Starting batch generation for ${priorityLevel} priority keywords`);
+    console.log(`📝 Generating ${keywordsToProcess.length} articles...\n`);
+
+    const results = [];
+
+    for (let i = 0; i < keywordsToProcess.length; i++) {
+      const keywordData = keywordsToProcess[i];
+      console.log(`\n📝 Progress: ${i + 1}/${keywordsToProcess.length}`);
+      
+      const topic = this.createTopicFromKeyword(keywordData, options);
+      const result = await this.generateBlogPost(topic);
+      
+      if (result) {
+        const filepath = this.saveBlogPost(result);
+        results.push({
+          success: true,
+          keyword: keywordData.keyword,
+          title: result.title,
+          filepath: filepath,
+          opportunityScore: keywordData.opportunityScore
+        });
+      } else {
+        results.push({
+          success: false,
+          keyword: keywordData.keyword,
+          error: 'Failed to generate content'
+        });
+      }
+
+      // Add delay between generations to avoid API rate limits
+      if (i < keywordsToProcess.length - 1) {
+        console.log('⏱️  Waiting 2 seconds before next generation...');
+        await this.delay(2000);
+      }
+    }
+
+    return results.filter(result => result.success);
+  }
+
+  // Generate with WittyReply branding
+  async generateWithWittyReplyBranding(keyword) {
+    const originalMode = this.wittyReplyMode;
+    this.wittyReplyMode = true;
+    
+    try {
+      const result = await this.generateEnhancedBlogPost(keyword);
+      return result;
+    } finally {
+      this.wittyReplyMode = originalMode;
+    }
+  }
+
+  // Utility methods
+  generateTitleFromKeyword(keyword) {
+    return keyword
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  prioritizeKeywords() {
+    const prioritized = {
+      high: this.keywordData.filter(k => k.recommendation === 'MEDIUM_PRIORITY'),
+      medium: this.keywordData.filter(k => k.recommendation === 'LONG_TERM'),
+      low: this.keywordData.filter(k => k.recommendation === 'CONSIDER')
+    };
+
+    Object.keys(prioritized).forEach(priority => {
+      prioritized[priority].sort((a, b) => b.opportunityScore - a.opportunityScore);
+    });
+
+    return prioritized;
+  }
+
+  createTopicFromKeyword(keywordData, options = {}) {
+    const keyword = keywordData.keyword;
+    const difficulty = this.mapDifficultyScore(keywordData.difficultyScore);
+    const industry = this.extractIndustryFromKeyword(keyword);
+    
+    const title = this.generateTitleForKeyword(keyword, keywordData.opportunityScore);
+    const description = this.generateDescriptionForKeyword(keyword, keywordData);
+    const outline = this.generateOutlineForKeyword(keyword);
+
+    return {
+      title: title,
+      keyword: keyword,
+      description: description,
+      outline: outline,
+      difficulty: difficulty,
+      estimatedWords: options.targetWords || this.config.generation?.targetWords || 4000,
+      industry: industry,
+      opportunityScore: keywordData.opportunityScore,
+      competition: keywordData.competition,
+      ...options
+    };
+  }
+
+  generateTitleForKeyword(keyword, opportunityScore) {
+    const titleTemplates = {
+      'whatsapp automation ai tool': [
+        'Top WhatsApp Automation AI Tools That Transform Business Communication',
+        'Revolutionary WhatsApp AI Tools: Automate Your Customer Service in 2024',
+        'Best WhatsApp Automation AI Tools for Smart Business Growth'
+      ],
+      'whatsapp marketing automation software': [
+        'WhatsApp Marketing Automation Software: Complete Business Guide',
+        'Powerful WhatsApp Marketing Automation Tools for Modern Businesses',
+        'Transform Your Marketing with WhatsApp Automation Software'
+      ],
+      'best whatsapp automation software': [
+        'Best WhatsApp Automation Software: Expert Reviews & Comparisons',
+        'Top-Rated WhatsApp Automation Software for Business Success',
+        'Ultimate Guide to Choosing WhatsApp Automation Software'
+      ]
+    };
+
+    if (titleTemplates[keyword]) {
+      return titleTemplates[keyword][Math.floor(Math.random() * titleTemplates[keyword].length)];
+    }
+
+    if (keyword.includes('ai')) {
+      return `AI-Powered ${this.capitalizeKeyword(keyword)}: Transform Your Business`;
+    } else if (keyword.includes('automation')) {
+      return `Master ${this.capitalizeKeyword(keyword)} for Business Growth`;
+    } else if (keyword.includes('tools')) {
+      return `Essential ${this.capitalizeKeyword(keyword)} for Modern Businesses`;
+    } else {
+      return `Complete Guide to ${this.capitalizeKeyword(keyword)}`;
+    }
+  }
+
+  generateDescriptionForKeyword(keyword, keywordData) {
+    const descriptions = {
+      'whatsapp automation ai tool': 'Discover powerful WhatsApp AI automation tools that streamline customer service and boost business efficiency.',
+      'whatsapp marketing automation software': 'Transform your marketing strategy with advanced WhatsApp automation software designed for business growth.',
+      'best whatsapp automation software': 'Compare top WhatsApp automation software solutions and find the perfect fit for your business needs.'
+    };
+
+    return descriptions[keyword] || 
+           `Comprehensive guide to ${keyword} for modern businesses. Learn implementation strategies and best practices.`;
+  }
+
+  generateOutlineForKeyword(keyword) {
+    const baseOutlines = {
+      'ai': [
+        'Introduction to AI-Powered WhatsApp Automation',
+        'Key Benefits of AI Integration',
+        'Top AI WhatsApp Tools & Features',
+        'Implementation Best Practices',
+        'Real-World Success Stories',
+        'Getting Started with AI Automation',
+        'Future of AI in WhatsApp Business',
+        'Conclusion & Next Steps'
+      ],
+      'software': [
+        'WhatsApp Automation Software Overview',
+        'Essential Features to Look For',
+        'Top Software Solutions Comparison',
+        'Integration & Setup Guide',
+        'Cost-Benefit Analysis',
+        'Common Implementation Challenges',
+        'Success Metrics & ROI',
+        'Choosing the Right Solution'
+      ]
+    };
+
+    for (const [key, outline] of Object.entries(baseOutlines)) {
+      if (keyword.includes(key)) {
+        return outline;
+      }
+    }
+
+    return [
+      'Introduction & Overview',
+      'Key Benefits & Advantages',
+      'Implementation Strategy',
+      'Best Practices & Tips',
+      'Real-World Examples',
+      'Common Challenges & Solutions',
+      'Measuring Success',
+      'Conclusion & Action Steps'
+    ];
+  }
+
+  capitalizeKeyword(keyword) {
+    return keyword.split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  mapDifficultyScore(score) {
+    if (score <= 50) return 'beginner';
+    if (score <= 70) return 'intermediate';
+    return 'advanced';
+  }
+
+  extractIndustryFromKeyword(keyword) {
+    if (keyword.includes('business') || keyword.includes('enterprise')) return 'business automation';
+    if (keyword.includes('marketing')) return 'digital marketing';
+    if (keyword.includes('ai')) return 'artificial intelligence';
+    if (keyword.includes('software')) return 'software solutions';
+    return 'business automation';
+  }
+
+  analyzeKeywords() {
+    if (this.keywordData.length === 0) {
+      console.log('No keywords loaded. Use "load-csv" command first.');
+      return;
+    }
+
+    const prioritized = this.prioritizeKeywords();
+    console.log(`🎯 Priority breakdown:`);
+    console.log(`   High Priority (MEDIUM_PRIORITY): ${prioritized.high.length} keywords`);
+    console.log(`   Medium Priority (LONG_TERM): ${prioritized.medium.length} keywords`);
+    console.log(`   Low Priority (CONSIDER): ${prioritized.low.length} keywords`);
+  }
+
+  generateSummaryReport(postData, generationTime) {
+    const report = {
+      timestamp: new Date().toISOString(),
+      title: postData.title,
+      keyword: postData.keyword,
+      wordCount: postData.wordCount,
+      imageCount: postData.images ? postData.images.length : 0,
+      generationTime: parseFloat(generationTime),
+      isAIGenerated: postData.isAIGenerated,
+      hasImages: postData.hasImages,
+      wittyReplyMode: postData.wittyReplyMode,
+      slug: postData.slug,
+      publishDate: postData.publishDate
+    };
+
+    const reportsDir = path.join(__dirname, '../reports');
+    if (!fs.existsSync(reportsDir)) {
+      fs.mkdirSync(reportsDir, { recursive: true });
+    }
+
+    const reportFile = path.join(reportsDir, `enhanced-blog-${Date.now()}.json`);
+    fs.writeFileSync(reportFile, JSON.stringify(report, null, 2));
+    
+    console.log(`📊 Report saved: ${reportFile}`);
+  }
+
+  generateFinalSummary(results) {
+    const successful = results.filter(r => r.success);
+    const failed = results.filter(r => !r.success);
+    
+    console.log('\n' + '=' .repeat(60));
+    console.log('📊 ENHANCED BLOG GENERATION SUMMARY');
+    console.log('=' .repeat(60));
+    console.log(`✅ Successful: ${successful.length}`);
+    console.log(`❌ Failed: ${failed.length}`);
+    console.log(`📝 Total Posts: ${results.length}`);
+    
+    if (successful.length > 0) {
+      const totalWords = successful.reduce((sum, r) => sum + (r.postData?.wordCount || 0), 0);
+      const totalImages = successful.reduce((sum, r) => sum + (r.postData?.images?.length || 0), 0);
+      const avgGenerationTime = successful.reduce((sum, r) => sum + (r.generationTime || 0), 0) / successful.length;
+      
+      console.log(`📊 Total Words Generated: ${totalWords.toLocaleString()}`);
+      console.log(`🎨 Total Images Generated: ${totalImages}`);
+      console.log(`⏱️  Average Generation Time: ${avgGenerationTime.toFixed(2)}s`);
+    }
+    
+    if (failed.length > 0) {
+      console.log('\n❌ Failed Posts:');
+      failed.forEach(f => console.log(`  - ${f.keyword}: ${f.error}`));
+    }
+    
+    console.log('\n🎉 Enhanced blog generation complete!');
+  }
+
+  async testImageGeneration() {
+    console.log('\n🎨 Testing image generation...');
+    
+    try {
+      const testPrompt = "Professional business team using modern technology, clean office environment, digital transformation concept";
+      const image = await this.imageGenerator.generateImage(testPrompt, {
+        aspectRatio: "16:9",
+        megapixels: "1",
+        outputQuality: 80
+      });
+      
+      if (image) {
+        console.log(`✅ Test image generated successfully: ${image.filename}`);
+        console.log(`📁 Saved to: ${image.filepath}`);
+        return true;
+      } else {
+        console.log('❌ Test image generation failed');
+        return false;
+      }
+    } catch (error) {
+      console.error(`❌ Image generation test failed: ${error.message}`);
+      return false;
+    }
+  }
+
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const generator = new BlogPostGenerator();
+  generator.runCLI().catch(console.error);
 }
 
 export default BlogPostGenerator;

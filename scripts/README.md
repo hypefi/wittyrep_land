@@ -1,35 +1,58 @@
 # 🚀 WittyReply Automated Blog Post Generator
 
-An intelligent system for generating daily blog posts with keyword planning to boost SEO for your WhatsApp automation business.
+An intelligent, consolidated system for generating daily blog posts with advanced keyword planning, AI-powered content generation, and comprehensive automation features.
 
 ## ✨ Features
 
-- **🤖 Automated Content Generation**: Create blog posts daily without manual intervention
-- **🎯 Smart Keyword Planning**: Generate SEO-optimized keywords and topics
-- **📝 Content Templates**: Professional blog post templates with consistent styling
-- **🔄 Content Variations**: Generate multiple angles for the same topic
+- **🤖 AI-Powered Content Generation**: Create 4000+ word blog posts with OpenAI integration
+- **🎯 Smart Keyword Planning**: Generate SEO-optimized keywords and track usage
+- **📋 Content Planning System**: Schedule and manage upcoming content
+- **🎨 Automatic Image Generation**: AI-generated images for blog posts
+- **🔗 Smart Internal Linking**: Automatic internal link generation
 - **📊 SEO Optimization**: Built-in meta tags, structured data, and sitemap updates
-- **⏰ Scheduled Automation**: Set up cron jobs for daily execution
-- **📈 Analytics & Reporting**: Track performance and generate daily reports
+- **⚡ Quick & Full Modes**: Choose between fast updates or comprehensive analysis
+- **🎯 WittyReply Branding**: Optional WittyReply product integration
+- **📈 Analytics & Reporting**: Track performance and generate detailed reports
+- **🔧 Feature Flags**: Flexible configuration through feature toggles
 
-## 🏗️ System Architecture
+## 🏗️ Consolidated System Architecture
 
 ```
 scripts/
-├── keyword-planner.js      # Keyword research and topic generation
-├── blog-generator.js       # Blog post creation and HTML generation
-├── daily-automation.js     # Main automation orchestrator
-├── setup-cron.js          # Cron job setup and management
-└── README.md              # This file
+├── config-manager.js          # Unified configuration management
+├── blog-generator.js          # Unified blog post generation (all modes)
+├── daily-automation.js        # Main orchestrator with planning
+├── keyword-planner.js         # Keyword management and tracking
+├── internal-linker.js         # SEO internal linking
+├── sync-sitemap.js           # Sitemap management
+├── image-generator.js         # Unified image generation
+├── auto-blog-organizer.js     # Blog organization (quick/full modes)
+├── blog-manager.js           # Article lifecycle management
+├── ai-title-generator.js     # AI title generation
+├── blog-planner.js           # Content planning
+├── wittyreply-article-planner.js # WittyReply-specific planning
+├── blog-dashboard.js         # Blog management dashboard
+├── deploy-posts.js           # Post deployment
+├── update-blog-page.js       # Blog page updates
+├── extract-blog-metadata.js  # Metadata extraction
+├── test-*.js                 # Testing utilities
+└── MIGRATION_GUIDE.md        # Migration documentation
 
 templates/
-├── blog-template.html      # Main HTML template for blog posts
-└── meta-template.html      # SEO meta tags template
+├── blog-template.html         # Main HTML template for blog posts
+└── meta-template.html         # SEO meta tags template
 
-data/                       # Generated data and keywords
-logs/                       # Automation logs
-reports/                    # Daily reports
-config/                     # Configuration files
+data/                          # Generated data and keywords
+├── used-keywords.json         # Keyword tracking
+├── used-titles.json          # Title tracking
+├── articles.json             # Article management
+├── custom-articles.json     # Custom articles
+└── generated-images-*.json   # Image metadata
+
+logs/                          # Automation logs
+reports/                       # Daily reports
+config/                        # Configuration files
+└── automation.json           # Consolidated configuration
 ```
 
 ## 🚀 Quick Start
@@ -44,303 +67,334 @@ cd /path/to/your/landing-page
 npm install
 ```
 
-### 2. Generate Your First Blog Post
-
-```bash
-# Generate 1 blog post
-node scripts/daily-automation.js generate 1
-
-# Generate multiple posts
-node scripts/daily-automation.js generate 3
-```
-
-### 3. Set Up Daily Automation
-
-```bash
-# Set up automatic daily generation at 9:00 AM
-node scripts/setup-cron.js setup
-
-# Check automation status
-node scripts/setup-cron.js status
-```
-
-## 📖 Detailed Usage
-
-### Keyword Planning
-
-Generate new topic ideas with SEO-optimized keywords:
-
-```bash
-# Generate 10 topic ideas
-node scripts/keyword-planner.js 10
-
-# Generate 5 topic ideas
-node scripts/keyword-planner.js 5
-```
-
-**Output Example:**
-```
-🎯 Generated Topic Ideas:
-
-1. How WhatsApp Automation Can Transform Your Business
-   Keyword: whatsapp automation business efficiency
-   Description: Discover how WhatsApp automation can transform your business operations and streamline your results.
-   Difficulty: intermediate | Est. Words: 1500
-   Outline: Introduction and Problem Statement → Why This Matters for Your Business → Key Benefits and ROI → Step-by-Step Implementation → Real Examples and Case Studies → Common Mistakes to Avoid → Tools and Resources Needed → Conclusion and Next Steps
-
-2. 12 WhatsApp Lead Generation Strategies That Actually Work
-   Keyword: whatsapp lead generation customer acquisition
-   Description: Learn proven WhatsApp lead generation techniques that can help you acquire 45+ new customers monthly.
-   Difficulty: beginner | Est. Words: 2000
-   Outline: Introduction and Problem Statement → Why This Matters for Your Business → Lead Generation Statistics and Trends → Key Benefits and ROI → Lead Nurturing Strategies → Step-by-Step Implementation → Real Examples and Case Studies → Common Mistakes to Avoid → Tools and Resources Needed → Conclusion and Next Steps
-```
-
-### Blog Post Generation
-
-Generate complete HTML blog posts:
-
-```bash
-# Generate 1 post today
-node scripts/daily-automation.js generate 1
-
-# Generate 3 posts today
-node scripts/daily-automation.js generate 3
-```
-
-### Configuration Management
-
-View and modify automation settings:
+### 2. Configure the System
 
 ```bash
 # Show current configuration
-node scripts/daily-automation.js config show
+node config-manager.js show
 
 # Set posts per day
-node scripts/daily-automation.js config set postsPerDay 2
+node config-manager.js set generation.postsPerDay 2
 
-# Set content variation level
-node scripts/daily-automation.js config set contentVariation high
+# Enable WittyReply branding
+node config-manager.js feature wittyReplyBranding true
+
+# Enable planning system
+node config-manager.js feature planning true
 ```
 
-**Available Configuration Options:**
-- `postsPerDay`: Number of posts to generate daily (default: 1)
-- `maxPostsInQueue`: Maximum posts to keep in queue (default: 30)
-- `autoPublish`: Auto-publish posts (default: false)
-- `notificationEmail`: Email for notifications (default: '')
-- `keywordsPerPost`: Keywords per post (default: 3)
-- `contentVariation`: Content variation level - 'low', 'medium', 'high' (default: 'high')
-- `seoOptimization`: Enable SEO optimization (default: true)
-- `socialSharing`: Enable social sharing (default: false)
-
-### Automation Management
-
-Set up and manage daily automation:
+### 3. Generate Your First Blog Post
 
 ```bash
-# Set up daily cron job (9:00 AM)
-node scripts/setup-cron.js setup
+# Generate 1 blog post with AI
+node blog-generator.js generate "whatsapp automation"
 
-# Check automation status
-node scripts/setup-cron.js status
+# Generate multiple posts
+node blog-generator.js generate-multiple 3
 
-# Remove automation
-node scripts/setup-cron.js remove
+# Generate with WittyReply branding
+node blog-generator.js generate-wittyreply "best chatbot"
+
+# Generate from CSV keywords
+node blog-generator.js generate-csv high 3
 ```
 
-### Reports and Monitoring
-
-Generate reports and monitor performance:
+### 4. Test Image Generation
 
 ```bash
-# Generate daily report
-node scripts/daily-automation.js report
+# Test image generation
+node image-generator.js test
+
+# Generate batch images
+node image-generator.js batch
+
+# Update blog post images
+node image-generator.js update posts/blog-post.html
+```
+
+### 5. Organize Your Blog
+
+```bash
+# Quick blog organization update
+node auto-blog-organizer.js quick
+
+# Full blog organization with analysis
+node auto-blog-organizer.js full
+```
+
+## 📋 Content Planning System
+
+### Enable Planning
+
+```bash
+# Enable planning system
+node daily-automation.js planning enable
+
+# Auto-plan content for upcoming weeks
+node daily-automation.js plan
+
+# Generate planned content
+node daily-automation.js generate
+```
+
+### Manage Articles
+
+```bash
+# Add new article
+node blog-manager.js add "WhatsApp AI Guide" "whatsapp ai"
+
+# Add custom article
+node blog-manager.js add-custom "Custom Guide" "automation"
+
+# List articles by status
+node blog-manager.js list planned
+
+# Show upcoming articles
+node blog-manager.js upcoming 14
+
+# Generate custom article
+node blog-manager.js generate article-id
+```
+
+## 🔧 Configuration Options
+
+### Feature Flags
+
+Control functionality through feature flags:
+
+```bash
+# Content generation features
+node config-manager.js feature contentEnhancement true
+node config-manager.js feature imageGeneration true
+node config-manager.js feature internalLinking true
+
+# Planning features
+node config-manager.js feature planning true
+
+# Branding features
+node config-manager.js feature wittyReplyBranding false
+
+# Quality features
+node config-manager.js feature qualityCheck true
+node config-manager.js feature backupEnabled true
+```
+
+### Generation Settings
+
+```bash
+# Word count per post
+node config-manager.js set generation.targetWords 4000
+
+# Posts per day
+node config-manager.js set generation.postsPerDay 2
+
+# Content variation level
+node config-manager.js set generation.contentVariation high
+
+# Auto-deployment
+node config-manager.js set generation.autoDeploy true
+```
+
+### Planning Settings
+
+```bash
+# Planning configuration
+node config-manager.js set planning.autoPlan true
+node config-manager.js set planning.planWeeks 4
+node config-manager.js set planning.postsPerWeek 3
+node config-manager.js set planning.generateDays 7
+```
+
+## 🎯 Usage Examples
+
+### Daily Automation
+
+```bash
+# Generate daily posts with planning
+node daily-automation.js generate 2
+
+# Generate report
+node daily-automation.js report
 
 # Clean up old posts
-node scripts/daily-automation.js cleanup
+node daily-automation.js cleanup
+
+# Update blog organization
+node daily-automation.js organize
 ```
 
-## 🎨 Content Generation
+### Keyword Management
 
-### Topic Categories
+```bash
+# Generate new keywords
+node keyword-planner.js generate 10
 
-The system generates content around these key areas:
+# Show keyword statistics
+node keyword-planner.js stats
 
-1. **WhatsApp Automation**
-   - Business automation strategies
-   - Customer service optimization
-   - Lead generation techniques
-   - Workflow automation
-
-2. **Business Growth**
-   - Digital marketing
-   - Customer acquisition
-   - Business efficiency
-   - Sales automation
-
-3. **Industry-Specific**
-   - Real estate automation
-   - E-commerce optimization
-   - Service business automation
-   - Healthcare automation
-
-### Content Structure
-
-Each blog post includes:
-
-- **SEO-Optimized Title**: Based on target keywords
-- **Meta Description**: Compelling summary for search results
-- **Introduction**: Problem statement and hook
-- **Quick Stats**: Relevant statistics and data
-- **Main Content**: Structured sections based on outline
-- **Examples**: Real-world use cases
-- **Implementation Steps**: Actionable guidance
-- **Conclusion**: Summary and call-to-action
-- **SEO Meta Tags**: Complete optimization
-
-### Content Variations
-
-When `contentVariation` is set to 'high', the system generates:
-
-- **Main Post**: Comprehensive guide
-- **How-To Variation**: Step-by-step tutorial
-- **Tips Variation**: Pro tips and best practices
-- **Case Study Variation**: Real examples and success stories
-
-## 🔧 Customization
-
-### Adding New Keywords
-
-Edit `scripts/keyword-planner.js` to add new keyword categories:
-
-```javascript
-const KEYWORD_CATEGORIES = {
-  // Add your new category
-  your_industry: [
-    'your industry whatsapp automation',
-    'your industry lead generation',
-    // ... more keywords
-  ]
-};
+# Mark keyword as used
+node keyword-planner.js mark "whatsapp automation"
 ```
 
-### Customizing Content Blocks
+### Blog Organization
 
-Modify `scripts/blog-generator.js` to add new content variations:
+```bash
+# Quick update (faster)
+node auto-blog-organizer.js quick
 
-```javascript
-loadContentBlocks() {
-  return {
-    // Add new content blocks
-    your_topic: [
-      "Your content variation 1",
-      "Your content variation 2",
-      // ... more variations
-    ]
-  };
-}
+# Full organization (comprehensive)
+node auto-blog-organizer.js full
 ```
 
-### Template Customization
+### Image Generation
 
-Edit the HTML templates in `templates/` directory:
+```bash
+# Test image generation
+node image-generator.js test
 
-- `blog-template.html`: Main blog post structure
-- `meta-template.html`: SEO meta tags and structured data
+# Generate batch images
+node image-generator.js batch
 
-## 📊 Monitoring and Analytics
+# Update specific blog post
+node image-generator.js update posts/my-blog-post.html
+```
 
-### Log Files
+## 📊 Monitoring & Reports
 
-- **Automation Logs**: `logs/automation.log`
-- **Cron Logs**: `logs/cron.log`
+### View Logs
 
-### Daily Reports
+```bash
+# Check automation logs
+tail -f logs/automation.log
 
-Generated in `reports/` directory with:
-- Posts generated today
-- Total posts count
-- Keywords used
-- Configuration settings
-- Generated post details
+# Check cron logs
+tail -f logs/cron.log
+```
 
-### Performance Tracking
+### Generate Reports
 
-Monitor your blog's SEO performance:
-- Keyword rankings
-- Organic traffic
-- Engagement metrics
-- Conversion rates
+```bash
+# Daily automation report
+node daily-automation.js report
+
+# Blog organization report
+node auto-blog-organizer.js report
+```
+
+## 🔄 Automation Setup
+
+### Cron Job Setup
+
+```bash
+# Set up daily automation
+node setup-cron.js
+
+# Manual cron setup
+# Add to crontab: 0 9 * * * cd /path/to/landing-page && node scripts/daily-automation.js generate
+```
+
+### Smart Cron (Recommended)
+
+```bash
+# Use smart cron for intelligent scheduling
+chmod +x smart-blog-cron.sh
+# Add to crontab: 0 9 * * * /path/to/landing-page/smart-blog-cron.sh
+```
+
+## 🎨 Customization
+
+### Templates
+
+Modify templates in the `templates/` directory:
+- `blog-template.html`: Main blog post template
+- `meta-template.html`: SEO meta tags template
+
+### Content Blocks
+
+Customize content blocks in `blog-generator.js`:
+- Introductions
+- Benefits
+- Statistics
+- Examples
+- Tips
+- Conclusions
+
+### WittyReply Integration
+
+Enable WittyReply branding for product-focused content:
+
+```bash
+node config-manager.js feature wittyReplyBranding true
+```
 
 ## 🚨 Troubleshooting
 
 ### Common Issues
 
-1. **Script Permission Denied**
+1. **API Key Issues**
    ```bash
-   chmod +x scripts/*.js
+   # Check environment variables
+   echo $OPENAI_API_KEY
+   echo $REPLICATE_API_TOKEN
    ```
 
-2. **Cron Job Not Running**
+2. **Configuration Issues**
    ```bash
-   # Check cron service
-   sudo service cron status
+   # Validate configuration
+   node config-manager.js validate
    
-   # Check cron logs
-   tail -f /var/log/cron
+   # Reset to defaults
+   node config-manager.js reset
    ```
 
-3. **Template Files Missing**
+3. **Import Errors**
    ```bash
-   # Ensure templates directory exists
-   mkdir -p templates
+   # Reinstall dependencies
+   npm install
    ```
 
-4. **Posts Not Generating**
-   ```bash
-   # Check logs
-   tail -f logs/automation.log
-   
-   # Test manually
-   node scripts/daily-automation.js generate 1
-   ```
+### Getting Help
 
-### Debug Mode
+- Check script help: `node <script-name>.js` (no arguments)
+- Review logs in `logs/` directory
+- Check migration guide: `scripts/MIGRATION_GUIDE.md`
 
-Enable detailed logging:
+## 📈 Performance Optimization
 
+### Quick Mode vs Full Mode
+
+- **Quick Mode**: Fast updates, basic metadata extraction
+- **Full Mode**: Comprehensive analysis, detailed categorization
+
+### Batch Processing
+
+Use batch commands for multiple operations:
 ```bash
-# Set environment variable for debug
-DEBUG=true node scripts/daily-automation.js generate 1
+node blog-generator.js generate-multiple 5
+node image-generator.js batch
 ```
 
-## 🔒 Security Considerations
+## 🔒 Security
 
-- **File Permissions**: Ensure scripts are not world-writable
-- **Cron Security**: Use specific user accounts for cron jobs
-- **Log Rotation**: Implement log rotation to prevent disk space issues
-- **Backup**: Regularly backup generated content and configuration
+- API keys stored in environment variables
+- No sensitive data in configuration files
+- Secure file handling and validation
 
-## 📈 Best Practices
+## 📝 Migration from Old System
 
-1. **Keyword Research**: Regularly update keyword categories based on trends
-2. **Content Quality**: Review generated posts before publishing
-3. **SEO Monitoring**: Track keyword performance and adjust strategies
-4. **Regular Updates**: Keep the system updated with new content variations
-5. **Performance**: Monitor system performance and optimize as needed
+If upgrading from the previous system, see `MIGRATION_GUIDE.md` for detailed migration instructions.
 
-## 🤝 Support
+## 🤝 Contributing
 
-For issues or questions:
+1. Follow the consolidated architecture
+2. Use feature flags for new functionality
+3. Maintain backward compatibility
+4. Update documentation
 
-1. Check the logs in `logs/` directory
-2. Review this README for common solutions
-3. Test individual components manually
-4. Check system requirements and dependencies
+## 📄 License
 
-## 📝 License
-
-This system is part of the WittyReply landing page project.
+This project is part of the WittyReply landing page system.
 
 ---
 
-**Happy Blogging! 🚀📝**
+**Need Help?** Check the migration guide or run any script without arguments for help.

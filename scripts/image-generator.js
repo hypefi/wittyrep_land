@@ -275,6 +275,247 @@ class ImageGenerator {
     
     return images;
   }
+
+  // Batch image generation (from generate-blog-images.js)
+  async generateBatchImages(prompts) {
+    console.log(`🎨 Starting batch image generation for ${prompts.length} prompts...`);
+    
+    const results = [];
+    
+    for (let i = 0; i < prompts.length; i++) {
+      const promptData = prompts[i];
+      console.log(`\n📝 Generating image ${i + 1}/${prompts.length}: ${promptData.section}`);
+      
+      try {
+        const output = await this.replicate.run("google/nano-banana", {
+          input: {
+            prompt: promptData.prompt
+          }
+        });
+        
+        console.log(`Generated image for ${promptData.section}:`, output);
+        
+        // Handle the output - nanobanana returns an object with url() method
+        const imageUrl = await output.url();
+        console.log(`Image URL:`, imageUrl);
+        
+        // Create images directory if it doesn't exist
+        if (!fs.existsSync(this.imagesDir)) {
+          fs.mkdirSync(this.imagesDir, { recursive: true });
+        }
+        
+        const localImagePath = path.join(this.imagesDir, promptData.filename);
+        
+        try {
+          // Write the file directly to disk using the output object
+          await fs.promises.writeFile(localImagePath, output);
+          console.log(`Image saved to: ${localImagePath}`);
+          
+          // Save the image info
+          const imageInfo = {
+            section: promptData.section,
+            url: imageUrl,
+            localPath: `/images/blog/${promptData.filename}`,
+            filename: promptData.filename,
+            generated_at: new Date().toISOString()
+          };
+          
+          const outputPath = path.join(__dirname, `../data/generated-images-${promptData.section}.json`);
+          fs.writeFileSync(outputPath, JSON.stringify(imageInfo, null, 2));
+          
+          console.log(`Image info saved to: ${outputPath}`);
+          
+          results.push({
+            success: true,
+            section: promptData.section,
+            filename: promptData.filename,
+            filepath: localImagePath,
+            url: imageUrl
+          });
+          
+        } catch (writeError) {
+          console.error(`Error writing image for ${promptData.section}:`, writeError);
+          results.push({
+            success: false,
+            section: promptData.section,
+            error: writeError.message
+          });
+        }
+        
+      } catch (error) {
+        console.error(`Error generating image for ${promptData.section}:`, error);
+        results.push({
+          success: false,
+          section: promptData.section,
+          error: error.message
+        });
+      }
+    }
+    
+    console.log(`\n🎨 Batch image generation completed!`);
+    console.log(`✅ Successful: ${results.filter(r => r.success).length}`);
+    console.log(`❌ Failed: ${results.filter(r => !r.success).length}`);
+    
+    return results;
+  }
+
+  // Update blog post images (from update-blog-images.js)
+  async updateBlogPostImages(blogPath, imageMapping) {
+    if (!fs.existsSync(blogPath)) {
+      console.error("Blog post not found:", blogPath);
+      return false;
+    }
+    
+    let blogContent = fs.readFileSync(blogPath, 'utf8');
+    let updated = false;
+    
+    // Load generated image data
+    for (const [sectionKey, sectionInfo] of Object.entries(imageMapping)) {
+      const imageDataPath = path.join(__dirname, `../data/generated-images-${sectionKey}.json`);
+      
+      if (fs.existsSync(imageDataPath)) {
+        const imageData = JSON.parse(fs.readFileSync(imageDataPath, 'utf8'));
+        
+        // Find the specific section by ID and update image
+        const sectionIdPattern = new RegExp(
+          `(<section class="main-content-section" id="${sectionInfo.section}"[^>]*>.*?<img[^>]*src="undefined"[^>]*alt="undefined"[^>]*>)`,
+          's'
+        );
+        
+        if (sectionIdPattern.test(blogContent)) {
+          blogContent = blogContent.replace(sectionIdPattern, (match) => {
+            return match.replace(
+              'src="undefined"',
+              `src="${imageData.localPath}"`
+            ).replace(
+              'alt="undefined"',
+              `alt="${sectionInfo.alt}"`
+            );
+          });
+          
+          console.log(`Updated image for section ${sectionInfo.section}: ${imageData.localPath}`);
+          updated = true;
+        }
+      } else {
+        console.log(`No image data found for section: ${sectionKey}`);
+      }
+    }
+    
+    if (updated) {
+      // Write the updated content back to the file
+      fs.writeFileSync(blogPath, blogContent);
+      console.log("Blog post updated with new images!");
+      return true;
+    }
+    
+    return false;
+  }
+
+  // CLI interface for image generation
+  async runCLI() {
+    const args = process.argv.slice(2);
+    const command = args[0];
+    const param = args[1];
+
+    switch (command) {
+      case 'batch':
+        const prompts = [
+          {
+            section: "fundamentals",
+            prompt: "Modern infographic showing WhatsApp chatbot fundamentals with AI and automation concepts. Clean business illustration with WhatsApp logo, chat bubbles, AI brain icon, automation gears, and customer service elements. Professional blue and green color scheme, flat design style, high quality, 16:9 aspect ratio",
+            filename: "whatsapp-chatbot-fundamentals.webp"
+          },
+          {
+            section: "strategies", 
+            prompt: "Business automation workflow diagram showing advanced WhatsApp chatbot implementation strategies. Modern corporate illustration with workflow arrows, strategy planning elements, CRM integration, and business process optimization. Professional green and blue color scheme, clean design, 16:9 aspect ratio",
+            filename: "whatsapp-chatbot-strategies.webp"
+          },
+          {
+            section: "case-studies",
+            prompt: "Business success analytics dashboard showing real-world WhatsApp chatbot case studies. Modern data visualization with charts, graphs, success metrics, customer satisfaction indicators, and business growth elements. Professional corporate color scheme, clean infographic style, 16:9 aspect ratio",
+            filename: "whatsapp-chatbot-case-studies.webp"
+          }
+        ];
+        await this.generateBatchImages(prompts);
+        break;
+
+      case 'test':
+        await this.testImageGeneration();
+        break;
+
+      case 'update':
+        const blogPath = param || path.join(__dirname, '../posts/blog-unlocking-the-power-of-whatsapp-automation-for-business-growth-2025-10-14.html');
+        const imageMapping = {
+          "fundamentals": {
+            section: "section-1",
+            alt: "WhatsApp Chatbot Fundamentals - AI and Automation Concepts"
+          },
+          "strategies": {
+            section: "section-2", 
+            alt: "Advanced WhatsApp Chatbot Implementation Strategies"
+          },
+          "case-studies": {
+            section: "section-3",
+            alt: "Real-World WhatsApp Chatbot Case Studies and Success Metrics"
+          }
+        };
+        await this.updateBlogPostImages(blogPath, imageMapping);
+        break;
+
+      default:
+        console.log(`
+🎨 Unified Image Generator
+
+Usage:
+  node image-generator.js batch                    - Generate batch images for blog sections
+  node image-generator.js test                      - Test image generation
+  node image-generator.js update [blog-path]        - Update blog post with generated images
+
+Examples:
+  node image-generator.js batch
+  node image-generator.js test
+  node image-generator.js update posts/my-blog-post.html
+
+Features:
+  🎨 AI-powered image generation using Flux Dev
+  📊 Batch processing for multiple images
+  🔄 Blog post image updating
+  📁 Automatic file management
+  🎯 Optimized prompts for different content types
+        `);
+    }
+  }
+
+  async testImageGeneration() {
+    console.log('\n🎨 Testing image generation...');
+    
+    try {
+      const testPrompt = "Professional business team using modern technology, clean office environment, digital transformation concept";
+      const image = await this.generateImage(testPrompt, {
+        aspectRatio: "16:9",
+        megapixels: "1",
+        outputQuality: 80
+      });
+      
+      if (image) {
+        console.log(`✅ Test image generated successfully: ${image.filename}`);
+        console.log(`📁 Saved to: ${image.filepath}`);
+        return true;
+      } else {
+        console.log('❌ Test image generation failed');
+        return false;
+      }
+    } catch (error) {
+      console.error(`❌ Image generation test failed: ${error.message}`);
+      return false;
+    }
+  }
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const generator = new ImageGenerator();
+  generator.runCLI().catch(console.error);
 }
 
 export default ImageGenerator;

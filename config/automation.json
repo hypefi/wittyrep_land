@@ -1,10 +1,73 @@
 {
-  "postsPerDay": "2",
-  "maxPostsInQueue": 30,
-  "autoPublish": false,
-  "notificationEmail": "",
-  "keywordsPerPost": 3,
-  "contentVariation": "high",
-  "seoOptimization": true,
-  "socialSharing": false
+  "generation": {
+    "targetWords": 4000,
+    "postsPerDay": 2,
+    "maxPostsInQueue": 30,
+    "contentVariation": "high",
+    "keywordsPerPost": 3,
+    "autoPublish": false,
+    "autoDeploy": true
+  },
+  "features": {
+    "wittyReplyBranding": false,
+    "contentEnhancement": true,
+    "imageGeneration": true,
+    "internalLinking": true,
+    "planning": true,
+    "seoOptimization": true,
+    "socialSharing": false,
+    "qualityCheck": true,
+    "backupEnabled": true
+  },
+  "keywordSources": ["built-in", "csv"],
+  "csvKeywordPath": "wittyreply_seo/whatsapp_ai_ENHANCED.csv",
+  "industries": [
+    "business automation",
+    "customer service",
+    "lead generation",
+    "small business",
+    "real estate",
+    "ecommerce",
+    "healthcare",
+    "education"
+  ],
+  "keywords": [
+    "whatsapp automation for small business",
+    "customer service automation strategies",
+    "lead generation automation tools",
+    "business process automation",
+    "whatsapp marketing automation",
+    "automated customer support",
+    "business efficiency automation",
+    "digital transformation strategies"
+  ],
+  "planning": {
+    "autoPlan": true,
+    "planWeeks": 4,
+    "postsPerWeek": 3,
+    "autoGenerate": true,
+    "generateDays": 7
+  },
+  "notifications": {
+    "email": "",
+    "enabled": false
+  },
+  "api": {
+    "openai": {
+      "required": true,
+      "timeout": 30000
+    },
+    "replicate": {
+      "required": false,
+      "timeout": 60000
+    }
+  },
+  "paths": {
+    "postsDir": "posts",
+    "distDir": "dist",
+    "imagesDir": "public/images/blog",
+    "logsDir": "logs",
+    "reportsDir": "reports",
+    "templatesDir": "templates"
+  }
 }

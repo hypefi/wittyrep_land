@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url';
 import KeywordPlanner from './keyword-planner.js';
 import BlogPostGenerator from './blog-generator.js';
 import PostDeployer from './deploy-posts.js';
+import BlogManager from './blog-manager.js';
+import ConfigManager from './config-manager.js';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -16,10 +18,13 @@ const __dirname = path.dirname(__filename);
 
 class DailyAutomation {
   constructor() {
+    this.configManager = new ConfigManager();
+    this.config = this.configManager.getConfig();
     this.keywordPlanner = new KeywordPlanner();
-    this.blogGenerator = new BlogPostGenerator();
+    this.blogGenerator = new BlogPostGenerator({ config: this.config });
     this.postDeployer = new PostDeployer();
-    this.config = this.loadConfig();
+    this.blogManager = new BlogManager();
+    this.planner = this.config.features?.planning ? new BlogPlanner() : null;
     this.logFile = path.join(__dirname, '../logs/automation.log');
   }
 
@@ -89,75 +94,222 @@ class DailyAutomation {
       
       // Check if we already have posts for today
       const todayPosts = existingPosts.filter(post => post.includes(today));
-      if (todayPosts.length >= this.config.postsPerDay) {
+      if (todayPosts.length >= (this.config.generation?.postsPerDay || this.config.postsPerDay || 1)) {
         this.log(`✅ Already have ${todayPosts.length} posts for today (${today})`);
         return;
       }
 
-      // Generate new topic ideas
-      this.log('📝 Generating new topic ideas...');
-      const topics = this.keywordPlanner.generateTopicIdeas(this.config.postsPerDay);
+      // Use planning if enabled
+      if (this.planner && this.config.features?.planning) {
+        await this.generateWithPlanning();
+      } else {
+        await this.generateWithoutPlanning();
+      }
       
-      if (topics.length === 0) {
-        this.log('⚠️ No new topics generated. All keywords may have been used.');
-        return;
+      // Auto-deploy if enabled
+      if (this.config.generation?.autoDeploy || this.config.autoDeploy) {
+        this.log('🚀 Auto-deploying posts...');
+        await this.postDeployer.deployAll();
       }
 
-      // Generate and save blog posts
-      for (const topic of topics) {
-        this.log(`📖 Generating blog post: ${topic.title}`);
-        
-        try {
-          const postData = await this.blogGenerator.generateBlogPost(topic);
-          const savedFile = this.blogGenerator.saveBlogPost(postData);
-          
-          if (savedFile) {
-            this.log(`✅ Blog post saved: ${path.basename(savedFile)}`);
-            
-            // Mark keyword as used
-            this.keywordPlanner.markKeywordAsUsed(topic.keyword);
-            
-            // Log AI generation status
-            if (postData.isAIGenerated) {
-              this.log(`🤖 Complete AI-generated article: ${postData.title}`);
-              this.log(`📊 Word count: ${postData.wordCount || postData.estimatedWords} words`);
-              this.log(`🎯 Sections: ${postData.outline.length} main sections`);
-            } else {
-              this.log(`⚠️ Used fallback generation: ${postData.fallbackReason || 'AI unavailable'}`);
-            }
-            
-            // Note: Variation generation disabled to prevent duplicates
-            // AI title generator now handles uniqueness
-            
-            // Update sitemap and blog index
-            this.updateSitemap(postData);
-            this.updateBlogIndex(postData);
-            
-          } else {
-            this.log(`❌ Failed to save blog post: ${topic.title}`, 'ERROR');
-          }
-        } catch (error) {
-          this.log(`❌ Error generating blog post: ${error.message}`, 'ERROR');
-        }
-      }
-
-      this.log('🎉 Daily blog post generation completed successfully!');
-      
-      // Deploy new posts to dist/ for live site
-      if (this.config.autoDeploy) {
-        await this.deployNewPosts();
-      }
-      
-      // Clean up old posts if needed
-      this.cleanupOldPosts();
-      
-      // Generate report
-      this.generateDailyReport();
+      this.log('✅ Daily blog post generation completed successfully!');
       
     } catch (error) {
       this.log(`❌ Fatal error in daily automation: ${error.message}`, 'ERROR');
       throw error;
     }
+  }
+
+  /**
+   * Generate posts with planning integration (from smart-blog-automation.js)
+   */
+  async generateWithPlanning() {
+    this.log('📋 Using planning system for content generation...');
+    
+    try {
+      // Get upcoming planned posts
+      const upcomingPosts = this.blogManager.getUpcomingArticles(this.config.planning?.generateDays || 7);
+      
+      if (upcomingPosts.length > 0) {
+        this.log(`📅 Found ${upcomingPosts.length} planned posts to generate`);
+        
+        for (const plannedPost of upcomingPosts.slice(0, this.config.generation?.postsPerDay || this.config.postsPerDay || 1)) {
+          this.log(`📝 Generating planned post: "${plannedPost.title}"`);
+          
+          const topic = {
+            keyword: plannedPost.keyword,
+            title: plannedPost.title,
+            description: plannedPost.description,
+            outline: plannedPost.outline,
+            difficulty: plannedPost.difficulty || 'intermediate',
+            estimatedWords: plannedPost.targetWords,
+            customInstructions: plannedPost.customInstructions
+          };
+
+          const postData = await this.blogGenerator.generateBlogPost(topic);
+          
+          if (postData) {
+            const filepath = this.blogGenerator.saveBlogPost(postData);
+            if (filepath) {
+              // Update article status
+              this.blogManager.updateArticleStatus(plannedPost.id, 'generated');
+              this.log(`✅ Generated planned post: "${plannedPost.title}"`);
+            }
+          }
+        }
+      } else {
+        this.log('📝 No planned posts found, generating fresh content...');
+        await this.generateWithoutPlanning();
+      }
+      
+    } catch (error) {
+      this.log(`❌ Error in planning generation: ${error.message}`, 'ERROR');
+      // Fallback to non-planning generation
+      await this.generateWithoutPlanning();
+    }
+  }
+
+  /**
+   * Generate posts without planning (original method)
+   */
+  async generateWithoutPlanning() {
+    this.log('📝 Generating fresh topic ideas...');
+    const topics = this.keywordPlanner.generateTopicIdeas(this.config.generation?.postsPerDay || this.config.postsPerDay || 1);
+    
+    if (topics.length === 0) {
+      this.log('⚠️ No new topics generated. All keywords may have been used.');
+      return;
+    }
+
+    // Generate and save blog posts
+    for (const topic of topics) {
+      this.log(`📖 Generating blog post: ${topic.title}`);
+      
+      try {
+        const postData = await this.blogGenerator.generateBlogPost(topic);
+        const savedFile = this.blogGenerator.saveBlogPost(postData);
+        
+        if (savedFile) {
+          this.log(`✅ Blog post saved: ${path.basename(savedFile)}`);
+          
+          // Mark keyword as used
+          this.keywordPlanner.markKeywordAsUsed(topic.keyword);
+          
+          // Log AI generation status
+          if (postData.isAIGenerated) {
+            this.log(`🤖 Complete AI-generated article: ${postData.title}`);
+            this.log(`📊 Word count: ${postData.wordCount || postData.estimatedWords} words`);
+            this.log(`🎯 Sections: ${postData.outline.length} main sections`);
+          }
+        }
+      } catch (error) {
+        this.log(`❌ Error generating post for "${topic.keyword}": ${error.message}`, 'ERROR');
+      }
+    }
+  }
+
+  /**
+   * Auto-plan content for upcoming weeks
+   */
+  async autoPlanContent() {
+    if (!this.config.features?.planning || !this.config.planning?.autoPlan) {
+      this.log('📋 Planning is disabled in configuration');
+      return;
+    }
+
+    this.log('📋 Starting auto-planning for upcoming content...');
+    
+    try {
+      const planWeeks = this.config.planning?.planWeeks || 4;
+      const postsPerWeek = this.config.planning?.postsPerWeek || 3;
+      const totalPosts = planWeeks * postsPerWeek;
+      
+      // Generate topic ideas for planning
+      const topics = this.keywordPlanner.generateTopicIdeas(totalPosts);
+      
+      // Create planned articles
+      for (let i = 0; i < topics.length; i++) {
+        const topic = topics[i];
+        const scheduledDate = this.calculateScheduledDate(i, postsPerWeek);
+        
+        const articleData = {
+          title: topic.title || `Complete Guide to ${topic.keyword}`,
+          keyword: topic.keyword,
+          description: topic.description || `Comprehensive guide to ${topic.keyword} for modern businesses`,
+          category: this.getCategoryFromKeyword(topic.keyword),
+          priority: 'high',
+          scheduledDate: scheduledDate,
+          targetWords: this.config.generation?.targetWords || 4000,
+          outline: topic.outline || this.generateDefaultOutline(topic.keyword)
+        };
+        
+        this.blogManager.addArticle(articleData);
+      }
+      
+      this.log(`✅ Auto-planned ${totalPosts} articles for the next ${planWeeks} weeks`);
+      
+    } catch (error) {
+      this.log(`❌ Error during auto-planning: ${error.message}`, 'ERROR');
+    }
+  }
+
+  /**
+   * Calculate scheduled date for planned content
+   */
+  calculateScheduledDate(index, postsPerWeek) {
+    const startDate = new Date();
+    const weeksAhead = Math.floor(index / postsPerWeek);
+    const dayInWeek = index % postsPerWeek;
+    
+    // Schedule posts on Monday, Wednesday, Friday
+    const daysOfWeek = [1, 3, 5]; // Monday, Wednesday, Friday
+    const targetDay = daysOfWeek[dayInWeek] || daysOfWeek[0];
+    
+    const scheduledDate = new Date(startDate);
+    scheduledDate.setDate(scheduledDate.getDate() + (weeksAhead * 7) + (targetDay - scheduledDate.getDay()));
+    
+    return scheduledDate.toISOString().split('T')[0];
+  }
+
+  /**
+   * Get category from keyword
+   */
+  getCategoryFromKeyword(keyword) {
+    const keywordLower = keyword.toLowerCase();
+    
+    if (keywordLower.includes('ai') || keywordLower.includes('artificial intelligence')) {
+      return 'ai_tools';
+    } else if (keywordLower.includes('business') || keywordLower.includes('growth')) {
+      return 'business_automation';
+    } else if (keywordLower.includes('marketing') || keywordLower.includes('digital')) {
+      return 'digital_marketing';
+    } else if (keywordLower.includes('automation') || keywordLower.includes('chatbot')) {
+      return 'whatsapp_automation';
+    } else if (keywordLower.includes('customer service') || keywordLower.includes('support')) {
+      return 'customer_service';
+    } else if (keywordLower.includes('lead generation') || keywordLower.includes('leads')) {
+      return 'lead_generation';
+    } else if (keywordLower.includes('real estate') || keywordLower.includes('property')) {
+      return 'real_estate';
+    } else {
+      return 'whatsapp_automation';
+    }
+  }
+
+  /**
+   * Generate default outline for keyword
+   */
+  generateDefaultOutline(keyword) {
+    return [
+      'Introduction & Overview',
+      'Key Benefits & Advantages',
+      'Implementation Strategy',
+      'Best Practices & Tips',
+      'Real-World Examples',
+      'Common Challenges & Solutions',
+      'Measuring Success',
+      'Conclusion & Action Steps'
+    ];
   }
 
   async generateVariations(postData, topic) {
@@ -479,6 +631,26 @@ class DailyAutomation {
       case 'organize':
         await this.updateBlogOrganization();
         break;
+
+      case 'plan':
+        await this.autoPlanContent();
+        break;
+
+      case 'planning':
+        if (args[1] === 'enable') {
+          this.config.features = this.config.features || {};
+          this.config.features.planning = true;
+          this.configManager.updateConfig({ features: this.config.features });
+          console.log('✅ Planning enabled');
+        } else if (args[1] === 'disable') {
+          this.config.features = this.config.features || {};
+          this.config.features.planning = false;
+          this.configManager.updateConfig({ features: this.config.features });
+          console.log('✅ Planning disabled');
+        } else {
+          console.log(`Planning status: ${this.config.features?.planning ? 'enabled' : 'disabled'}`);
+        }
+        break;
         
       default:
         console.log(`
@@ -486,15 +658,30 @@ class DailyAutomation {
 
 Usage:
   node daily-automation.js generate [count]  - Generate new blog posts
-  node daily-automation.js config show       - Show current configuration
+  node daily-automation.js plan             - Auto-plan content for upcoming weeks
+  node daily-automation.js planning [cmd]   - Enable/disable planning system
+  node daily-automation.js config show      - Show current configuration
   node daily-automation.js config set <k> <v> - Set configuration value
-  node daily-automation.js report            - Generate daily report
-  node daily-automation.js cleanup           - Clean up old posts
-  node daily-automation.js organize          - Update blog organization
+  node daily-automation.js report           - Generate daily report
+  node daily-automation.js cleanup          - Clean up old posts
+  node daily-automation.js organize        - Update blog organization
 
 Examples:
-  node daily-automation.js generate 3        - Generate 3 posts today
-  node daily-automation.js config set postsPerDay 2
+  node daily-automation.js generate 2
+  node daily-automation.js plan
+  node daily-automation.js planning enable
+  node daily-automation.js config set postsPerDay 3
+  node daily-automation.js report
+
+Features:
+  🤖 AI-powered content generation
+  📋 Content planning system
+  📊 Automatic keyword tracking
+  🚀 Auto-deployment to dist/
+  📈 Daily reporting
+  🧹 Automatic cleanup
+  📚 Blog organization
+  🎯 Smart scheduling
         `);
     }
   }

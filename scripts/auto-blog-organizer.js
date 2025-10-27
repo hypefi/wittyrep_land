@@ -13,10 +13,11 @@ const __dirname = path.dirname(__filename);
  */
 
 class BlogOrganizer {
-  constructor() {
+  constructor(mode = 'full') {
     this.postsDir = path.join(__dirname, '../posts');
     this.blogHtmlPath = path.join(__dirname, '../blog.html');
     this.posts = [];
+    this.mode = mode; // 'full' or 'quick'
   }
 
   /**
@@ -346,7 +347,17 @@ ${blogCards}
    * Main execution method
    */
   async run() {
-    console.log('🚀 Starting Blog Organization Process...\n');
+    if (this.mode === 'quick') {
+      return this.quickUpdate();
+    }
+    return this.fullOrganize();
+  }
+
+  /**
+   * Full organization with comprehensive analysis
+   */
+  async fullOrganize() {
+    console.log('🚀 Starting full blog organization...\n');
     
     // Load all posts
     this.loadAllPosts();
@@ -359,10 +370,260 @@ ${blogCards}
     // Update blog page
     this.updateBlogPage();
     
-    console.log('\n🎉 Blog organization complete!');
+    console.log('\n🎉 Full blog organization complete!');
+  }
+
+  /**
+   * Quick update mode (from update-blog-organization.js)
+   */
+  async quickUpdate() {
+    console.log('⚡ Starting quick blog organization update...\n');
+    
+    try {
+      // Get all blog post files sorted by modification date (newest first)
+      const files = this.getAllPostFiles();
+      
+      if (files.length === 0) {
+        console.log('No blog posts found');
+        return;
+      }
+
+      console.log(`Found ${files.length} blog posts`);
+
+      // Extract basic metadata for each post
+      const posts = files.map(file => {
+        const metadata = this.extractBasicMetadata(file.filePath);
+        return {
+          filename: file.filename,
+          filePath: file.filePath,
+          mtime: file.mtime,
+          ...metadata
+        };
+      });
+
+      // Generate blog HTML with quick metadata
+      this.generateQuickBlogHTML(posts);
+      
+      console.log('\n✅ Quick blog organization completed successfully!');
+      
+    } catch (error) {
+      console.error('❌ Error during quick blog organization:', error);
+    }
+  }
+
+  /**
+   * Get all blog post files sorted by modification date (newest first)
+   */
+  getAllPostFiles() {
+    const files = fs.readdirSync(this.postsDir)
+      .filter(file => file.endsWith('.html'))
+      .map(file => {
+        const filePath = path.join(this.postsDir, file);
+        const stats = fs.statSync(filePath);
+        return {
+          filename: file,
+          filePath,
+          mtime: stats.mtime
+        };
+      })
+      .sort((a, b) => b.mtime - a.mtime); // Sort by modification time, newest first
+
+    return files;
+  }
+
+  /**
+   * Extract basic metadata from a blog post (quick mode)
+   */
+  extractBasicMetadata(filePath) {
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const filename = path.basename(filePath);
+      
+      // Extract title
+      const titleMatch = content.match(/<title>(.*?) - WittyReply Blog<\/title>/);
+      const title = titleMatch ? titleMatch[1] : this.extractTitleFromFilename(filename);
+      
+      // Extract description
+      const descMatch = content.match(/<meta name="description" content="(.*?)">/);
+      const description = descMatch ? descMatch[1] : '';
+      
+      // Extract keywords
+      const keywordsMatch = content.match(/<meta name="keywords" content="(.*?)">/);
+      const keywords = keywordsMatch ? keywordsMatch[1].split(', ') : [];
+      
+      // Extract publish date from filename or content
+      const publishDate = this.extractPublishDate(content, filename);
+      
+      // Estimate reading time
+      const wordCount = this.estimateWordCount(content);
+      const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+      
+      return {
+        title,
+        description,
+        keywords,
+        publishDate,
+        readingTime,
+        wordCount
+      };
+    } catch (error) {
+      console.error(`Error extracting metadata from ${filePath}:`, error);
+      return {
+        title: this.extractTitleFromFilename(path.basename(filePath)),
+        description: '',
+        keywords: [],
+        publishDate: new Date().toISOString().split('T')[0],
+        readingTime: 5,
+        wordCount: 0
+      };
+    }
+  }
+
+  /**
+   * Generate blog HTML with quick metadata
+   */
+  generateQuickBlogHTML(posts) {
+    try {
+      const blogTemplate = fs.readFileSync(this.blogHtmlPath, 'utf8');
+      
+      // Generate post cards
+      const postCards = posts.map(post => this.generateQuickPostCard(post)).join('\n');
+      
+      // Replace the posts section
+      const updatedBlog = blogTemplate.replace(
+        /<!-- POSTS_START -->[\s\S]*?<!-- POSTS_END -->/,
+        `<!-- POSTS_START -->\n${postCards}\n          <!-- POSTS_END -->`
+      );
+      
+      // Write updated blog HTML
+      fs.writeFileSync(this.blogHtmlPath, updatedBlog);
+      console.log(`✅ Updated blog.html with ${posts.length} posts`);
+      
+    } catch (error) {
+      console.error('Error generating quick blog HTML:', error);
+    }
+  }
+
+  /**
+   * Generate a quick post card
+   */
+  generateQuickPostCard(post) {
+    const category = this.getCategoryFromKeywords(post.keywords);
+    const formattedDate = new Date(post.publishDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+    
+    const cardClass = "bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 hover:bg-gray-800/70 transition-all duration-300 hover:border-green-500/50";
+    const titleClass = "text-xl font-semibold mb-3 leading-tight";
+    
+    const tagsHTML = post.keywords.slice(0, 3).map(keyword => 
+      `<span class="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-sm">${keyword}</span>`
+    ).join('\n                    ');
+    
+    return `          <article class="${cardClass}">
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-3">
+                <span class="${category.class} px-3 py-1 rounded-full text-sm font-medium">${category.name}</span>
+                <span class="text-gray-400 text-sm">${formattedDate}</span>
+              </div>
+              <h3 class="${titleClass}">
+                <a href="posts/${post.filename}" class="text-white hover:text-primary-400 transition-colors">
+                  ${post.title}
+                </a>
+              </h3>
+              <p class="text-gray-300 mb-4 line-clamp-3">${post.description}</p>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-400">📖 ${post.readingTime} min read</span>
+                <div class="flex space-x-2">
+                  ${tagsHTML}
+                </div>
+              </div>
+            </div>
+          </article>`;
+  }
+
+  /**
+   * Get category from keywords (quick mode)
+   */
+  getCategoryFromKeywords(keywords) {
+    const text = keywords.join(' ').toLowerCase();
+    
+    if (text.includes('ai') || text.includes('artificial intelligence')) {
+      return { name: 'AI Tools', class: 'bg-purple-500/20 text-purple-400' };
+    } else if (text.includes('business') || text.includes('growth')) {
+      return { name: 'Business', class: 'bg-green-500/20 text-green-400' };
+    } else if (text.includes('marketing') || text.includes('digital')) {
+      return { name: 'Marketing', class: 'bg-blue-500/20 text-blue-400' };
+    } else if (text.includes('automation') || text.includes('chatbot')) {
+      return { name: 'Automation', class: 'bg-green-500/20 text-green-400' };
+    } else if (text.includes('customer service') || text.includes('support')) {
+      return { name: 'Customer Service', class: 'bg-blue-500/20 text-blue-400' };
+    } else if (text.includes('lead generation') || text.includes('leads')) {
+      return { name: 'Lead Generation', class: 'bg-green-500/20 text-green-400' };
+    } else if (text.includes('real estate') || text.includes('property')) {
+      return { name: 'Real Estate', class: 'bg-blue-500/20 text-blue-400' };
+    } else if (text.includes('software') || text.includes('tools')) {
+      return { name: 'Software', class: 'bg-purple-500/20 text-purple-400' };
+    } else {
+      return { name: 'General', class: 'bg-gray-500/20 text-gray-400' };
+    }
+  }
+
+  /**
+   * Estimate word count from HTML content
+   */
+  estimateWordCount(content) {
+    // Remove HTML tags and get text content
+    const textContent = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    return textContent.split(' ').length;
+  }
+
+  /**
+   * CLI interface
+   */
+  async runCLI() {
+    const args = process.argv.slice(2);
+    const command = args[0];
+
+    switch (command) {
+      case 'quick':
+        this.mode = 'quick';
+        await this.run();
+        break;
+
+      case 'full':
+        this.mode = 'full';
+        await this.run();
+        break;
+
+      default:
+        console.log(`
+📚 Blog Organizer
+
+Usage:
+  node auto-blog-organizer.js [mode]    - Organize blog posts
+
+Modes:
+  quick    - Quick update with basic metadata (faster)
+  full     - Full organization with comprehensive analysis (default)
+
+Examples:
+  node auto-blog-organizer.js quick
+  node auto-blog-organizer.js full
+
+Features:
+  📊 Automatic metadata extraction
+  🏷️  Smart categorization
+  📅 Date-based sorting
+  🎨 Beautiful card layouts
+  ⚡ Quick mode for fast updates
+        `);
+    }
   }
 }
 
 // Run the organizer
 const organizer = new BlogOrganizer();
-organizer.run().catch(console.error);
+organizer.runCLI().catch(console.error);

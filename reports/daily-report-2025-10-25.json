@@ -1,0 +1,31 @@
+{
+  "date": "2025-10-25",
+  "postsGenerated": 3,
+  "totalPosts": 42,
+  "keywordsUsed": 10,
+  "topicsGenerated": 3,
+  "config": {
+    "postsPerDay": 3,
+    "maxPostsInQueue": 30,
+    "autoPublish": false,
+    "notificationEmail": "",
+    "keywordsPerPost": 3,
+    "contentVariation": "high",
+    "seoOptimization": true,
+    "socialSharing": false
+  },
+  "generatedPosts": [
+    {
+      "filename": "blog-mastering-real-estate-customer-engagement-with-whatsapp-automation-2025-10-25.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-mastering-real-estate-customer-engagement-with-whatsapp-automation-2025-10-25.html"
+    },
+    {
+      "filename": "blog-transforming-service-industry-lead-generation-and-customer-engagement-through-business-automation-2025-10-25.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-transforming-service-industry-lead-generation-and-customer-engagement-through-business-automation-2025-10-25.html"
+    },
+    {
+      "filename": "blog-unlocking-the-power-of-online-business-automation-for-the-digital-age-2025-10-25.html",
+      "path": "/Users/mac/WORK/CODE/wittyreply_landingpage/landing-page/posts/blog-unlocking-the-power-of-online-business-automation-for-the-digital-age-2025-10-25.html"
+    }
+  ]
+}
